@@ -48,7 +48,3 @@ class SUpdateTask(TasksBase):
         ...,
         description='ID задачи, который нужно обновить'
     )
-
-
-print(SUpdateTask.to_dict())
-print(SNewTask.to_dict())

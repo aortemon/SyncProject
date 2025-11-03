@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.schedules.dao import SchedulesDAO
 from app.schedules.schemas import SNewSchedule, SUpdateSchedule
 from app.employees.models import Employee
-from app.employees.dependencies import get_current_admin_user
+from app.auth.dependencies import get_current_admin_user
 
 
 router = APIRouter(prefix='/schedules', tags=['Schedules'])
@@ -15,8 +15,22 @@ async def get_all_schedules(
     return await SchedulesDAO.find_all()
 
 
+@router.get('/get_by_id/')
+async def get_schedule_by_id(
+    id: int,
+    user_data: Employee = Depends(get_current_admin_user)
+):
+    result = await SchedulesDAO.find_one_or_none_by_id(id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"ID = {id} not found"
+        )
+    return result
+
+
 @router.post("/add/")
-async def add_status(
+async def add_schedule(
     response: Response,
     new_schedule: SNewSchedule,
     user_data: Employee = Depends(get_current_admin_user)
@@ -36,7 +50,7 @@ async def add_status(
 
 
 @router.put("/update/")
-async def update_status(
+async def update_schedule(
     response: Response,
     update: SUpdateSchedule,
     user_data: Employee = Depends(get_current_admin_user)

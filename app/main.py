@@ -7,6 +7,7 @@ from app.departments.router import router as router_departments
 from app.releases.router import router as router_releases
 from app.projects.router import router as router_projects
 from app.tasks.router import router as router_tasks
+from app.auth.router import router as router_auth
 
 app = FastAPI()
 
@@ -16,6 +17,7 @@ def homepage():
     return {'message': '<h1>Приветики-минетики</h1>'}
 
 
+app.include_router(router_auth)
 app.include_router(router_employees)
 app.include_router(router_statuses)
 app.include_router(router_workhours)
