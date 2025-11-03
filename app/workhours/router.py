@@ -30,6 +30,20 @@ async def add_workhour(
     return {'message': 'New workhour successfully added'}
 
 
+@router.get('/get_by_id/')
+async def get_workhour_by_id(
+    id: int,
+    user_data: Employee = Depends(get_current_admin_user)
+):
+    result = await WorkHoursDAO.find_one_or_none_by_id(id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"ID = {id} not found"
+        )
+    return result
+
+
 @router.put("/update/")
 async def update_workhour(
     response: Response,

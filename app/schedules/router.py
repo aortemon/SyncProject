@@ -15,6 +15,20 @@ async def get_all_schedules(
     return await SchedulesDAO.find_all()
 
 
+@router.get('/get_by_id/')
+async def get_depget_schedule_by_id(
+    id: int,
+    user_data: Employee = Depends(get_current_admin_user)
+):
+    result = await SchedulesDAO.find_one_or_none_by_id(id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"ID = {id} not found"
+        )
+    return result
+
+
 @router.post("/add/")
 async def add_status(
     response: Response,
