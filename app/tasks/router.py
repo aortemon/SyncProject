@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.tasks.dao import TasksDAO
 from app.tasks.schemas import SNewTask, SUpdateTask
 from app.employees.models import Employee
-from app.employees.dependencies import get_current_admin_user
+from app.auth.dependencies import get_current_admin_user
 
 
 router = APIRouter(prefix='/tasks', tags=['Tasks'])
@@ -16,7 +16,7 @@ async def get_all_tasks(
 
 
 @router.get('/get_by_id/')
-async def get_department_by_id(
+async def get_task_by_id(
     id: int,
     user_data: Employee = Depends(get_current_admin_user)
 ):

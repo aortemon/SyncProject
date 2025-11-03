@@ -2,14 +2,16 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.statuses.dao import StatusesDAO
 from app.statuses.schemas import SNewStatus, SUpdateStatus
 from app.employees.models import Employee
-from app.employees.dependencies import get_current_admin_user
+from app.auth.dependencies import get_current_admin_user
 
 
 router = APIRouter(prefix='/statuses', tags=['Statuses'])
 
 
 @router.get("/all/")
-async def get_all_users(user_data: Employee = Depends(get_current_admin_user)):
+async def get_all_statuses(
+    user_data: Employee = Depends(get_current_admin_user)
+):
     return await StatusesDAO.find_all()
 
 

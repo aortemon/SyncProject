@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.projects.dao import ProjectDAO
 from app.projects.schemas import SNewProject, SUpdateProject
 from app.employees.models import Employee
-from app.employees.dependencies import get_current_admin_user
+from app.auth.dependencies import get_current_admin_user
 
 
 router = APIRouter(prefix='/projects', tags=['Projects'])
@@ -16,7 +16,7 @@ async def get_all_projects(
 
 
 @router.get('/get_by_id/')
-async def get_department_by_id(
+async def get_project_by_id(
     id: int,
     user_data: Employee = Depends(get_current_admin_user)
 ):

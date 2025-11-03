@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.workhours.dao import WorkHoursDAO
 from app.workhours.schemas import SNewWorkhour, SUpdateWorkhour
 from app.employees.models import Employee
-from app.employees.dependencies import get_current_admin_user
+from app.auth.dependencies import get_current_admin_user
 
 
 router = APIRouter(prefix='/workhours', tags=['Work Hours'])

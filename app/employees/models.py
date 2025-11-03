@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base, str256, int_pk
 from app.roles.models import Role
+from app.schedules.models import Schedule
 
 from datetime import datetime
 

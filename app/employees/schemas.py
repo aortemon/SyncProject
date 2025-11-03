@@ -1,5 +1,5 @@
 import re
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import EmailStr, Field, field_validator
 from datetime import datetime
 from app.common.schema import SchemaBase
 
@@ -63,17 +63,3 @@ class EmployeeBase(SchemaBase):
                 ' "+" и содержать от 5 до 15 цифр'
             )
         return values
-
-
-class SEmployeeRegister(EmployeeBase):
-    ...
-
-
-class SUserAuth(BaseModel):
-    email: EmailStr = Field(..., description='Электронная почта')
-    password: str = Field(
-        ...,
-        min_length=8,
-        max_length=50,
-        description='Пароль'
-    )

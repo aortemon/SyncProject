@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.departments.dao import DepartmentsDAO
 from app.departments.schemas import SNewDepartment, SUpdateDepartment
 from app.employees.models import Employee
-from app.employees.dependencies import get_current_admin_user
+from app.auth.dependencies import get_current_admin_user
 
 
 router = APIRouter(prefix='/departments', tags=['Departments'])
@@ -31,11 +31,12 @@ async def get_department_by_id(
 
 
 @router.post("/add/")
-async def add_status(
+async def add_department(
     response: Response,
     new_department: SNewDepartment,
     user_data: Employee = Depends(get_current_admin_user)
 ):
+    print(response)
     await DepartmentsDAO.add(
         name=new_department.name,
         lead_id=new_department.lead_id
@@ -46,7 +47,7 @@ async def add_status(
 
 
 @router.put("/update/")
-async def update_status(
+async def update_department(
     response: Response,
     update: SUpdateDepartment,
     user_data: Employee = Depends(get_current_admin_user)

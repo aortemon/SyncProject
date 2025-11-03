@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.schedules.dao import SchedulesDAO
 from app.schedules.schemas import SNewSchedule, SUpdateSchedule
 from app.employees.models import Employee
-from app.employees.dependencies import get_current_admin_user
+from app.auth.dependencies import get_current_admin_user
 
 
 router = APIRouter(prefix='/schedules', tags=['Schedules'])
@@ -16,7 +16,7 @@ async def get_all_schedules(
 
 
 @router.get('/get_by_id/')
-async def get_depget_schedule_by_id(
+async def get_schedule_by_id(
     id: int,
     user_data: Employee = Depends(get_current_admin_user)
 ):
@@ -30,7 +30,7 @@ async def get_depget_schedule_by_id(
 
 
 @router.post("/add/")
-async def add_status(
+async def add_schedule(
     response: Response,
     new_schedule: SNewSchedule,
     user_data: Employee = Depends(get_current_admin_user)
@@ -50,7 +50,7 @@ async def add_status(
 
 
 @router.put("/update/")
-async def update_status(
+async def update_schedule(
     response: Response,
     update: SUpdateSchedule,
     user_data: Employee = Depends(get_current_admin_user)
