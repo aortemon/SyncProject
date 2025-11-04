@@ -6,54 +6,54 @@ from app.common.schema import SchemaBase, Validate
 class EmployeeBase(SchemaBase):
     lname: str = Field(
         ...,
-        description="Фамилия",
+        description="Last name",
         examples=['Пупкин'],
         min_length=3,
         max_length=50
     )
     fname: str = Field(
         ...,
-        description="Имя",
+        description="First name",
         examples=['Василий'],
         min_length=3,
         max_length=50
     )
     mname: str = Field(
         ...,
-        description="Отчество",
+        description="Middle name",
         examples=['Акакиевич'],
         min_length=3,
         max_length=50
     )
     dob: PastDate = Field(
         ...,
-        description="Дата рождения YYYY-MM-DD",
+        description="Date of birth. Format: YYYY-MM-DD",
         le=date.today() - timedelta(days=365*16)
     )
     schedule_id: int = Field(
         ...,
-        description="Идентификатор графика"
+        description="Schedule ID"
     )
     role_id: int = Field(
         ...,
-        description="Идентификатор роли"
+        description="Role ID"
     )
     phone: str = Field(
         ...,
-        description="Сотовый номер",
+        description="Phone number",
         examples=["+79051534857"],
         min_length=12,
         max_length=12
     )
     email: EmailStr = Field(
         ...,
-        description="Электронная почта",
+        description="Email",
         min_length=3,
         max_length=50
     )
     password: str = Field(
         ...,
-        description="Пароль от 8 дол 50 символов",
+        description="Password",
         min_length=12,
         max_length=48,
     )

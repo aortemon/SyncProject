@@ -70,7 +70,7 @@ async def update_task(
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'задача не обновлена. ID={update.id} не найден'
+            detail=f'task was not updated. ID={update.id} not found'
         )
     return {
         'message': f'Task(id={update.id}) was updated successfully'

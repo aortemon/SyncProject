@@ -22,37 +22,37 @@ FutureOrNowDate = Annotated[date, AfterValidator(validate_future_or_now)]
 class TasksBase(SchemaBase):
     creator_id: int = Field(
         ...,
-        description='ID создателя задачи'
+        description='Creator\'s ID'
     )
     executor_id: int = Field(
         ...,
-        description='ID исполнителя задачи'
+        description='Executor\'s ID'
     )
     start_date: FutureOrNowDate = Field(
         ...,
-        description='Дата начала выполнения задачи'
+        description='Start date of task execution'
     )
     end_date: FutureDate = Field(
         ...,
-        description='Дата окончания выполнения задачи'
+        description='End date of task execution'
     )
     name: str = Field(
         ...,
-        description='Название задачи',
+        description='Task name',
         min_length=3,
         max_length=30
     )
     description: str = Field(
         ...,
-        description='Описание задачи'
+        description='Task description'
     )
     status_id: int = Field(
         ...,
-        description='ID статуса задачи'
+        description='Status ID'
     )
     project_id: int = Field(
         ...,
-        description='ID проекта, которому принадлежит задача'
+        description='Project ID'
     )
 
     @model_validator(mode='after')
@@ -72,5 +72,5 @@ class SNewTask(TasksBase):
 class SUpdateTask(TasksBase):
     id: int = Field(
         ...,
-        description='ID задачи, который нужно обновить'
+        description='ID of task to update'
     )

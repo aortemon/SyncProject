@@ -54,7 +54,7 @@ async def update_status(
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Статус не обновлен. ID={update.id} не найден'
+            detail=f'Status was not updated. ID={update.id} not found'
         )
     return {
         'message': f'Status(id={update.id}) is "{update.alias}" now'
