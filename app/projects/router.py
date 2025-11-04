@@ -63,7 +63,7 @@ async def update_project(
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Проект не обновлен. ID={update.id} не найден'
+            detail=f'Project was not updated. ID={update.id} not found'
         )
     return {
         'message': f'Project(id={update.id}) was updated successfully'

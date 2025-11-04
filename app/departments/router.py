@@ -60,7 +60,7 @@ async def update_department(
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Отдел не обновлен. ID={update.id} не найден'
+            detail=f'Department was not uopdated. ID={update.id} not found'
         )
     return {
         'message': f'Department(id={update.id}) was updated successfully'

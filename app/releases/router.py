@@ -62,7 +62,7 @@ async def update_release(
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Релиз не обновлен. ID={update.id} не найден'
+            detail=f'Release was not updated. ID={update.id} '
         )
     return {
         'message': f'Release(id={update.id}) was updated successfully'

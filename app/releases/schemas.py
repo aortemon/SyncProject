@@ -5,19 +5,20 @@ from app.common.schema import SchemaBase
 class ReleaseBase(SchemaBase):
     name: str = Field(
         ...,
-        description='Название релиза'
+        description='Release name'
     )
     version: str = Field(
         ...,
-        description='Версия релиза'
+        description='Release version',
+        min_length=3
     )
     description: str = Field(
         ...,
-        description='Описание релиза'
+        description='Release description'
     )
     status_id: int = Field(
         ...,
-        description='ID статуса проекта'
+        description='Status ID'
     )
 
 
@@ -28,5 +29,5 @@ class SNewRelease(ReleaseBase):
 class SUpdateRelease(ReleaseBase):
     id: int = Field(
         ...,
-        description='ID релиза, который нужно обновить'
+        description='ID of release to update'
     )

@@ -1,8 +1,7 @@
 # from datetime import datetime
 from datetime import datetime
 from typing import Annotated
-
-from sqlalchemy import ForeignKey, Integer, String, Text, func, Time, DateTime
+from sqlalchemy import ForeignKey, Integer, String, func, Time
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
     async_sessionmaker,
@@ -13,7 +12,6 @@ from sqlalchemy.orm import (
     Mapped,
     declared_attr,
     mapped_column,
-    relationship,
 )
 
 # from app.employees.models import Employee

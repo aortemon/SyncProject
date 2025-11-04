@@ -5,31 +5,31 @@ from app.common.schema import SchemaBase
 class ScheduleBase(SchemaBase):
     sun_id: int = Field(
         ...,
-        description='Рабочий график воскресенья'
+        description='Sunday workhours'
     )
     mon_id: int = Field(
         ...,
-        description='Рабочий график понедельника'
+        description='Monday workhours'
     )
     tue_id: int = Field(
         ...,
-        description='Рабочий график вторника'
+        description='Tuesday workhours'
     )
     wed_id: int = Field(
         ...,
-        description='Рабочий график среды'
+        description='Wednesday workhours'
     )
     thu_id: int = Field(
         ...,
-        description='Рабочий график четверга'
+        description='Thursday workhours'
     )
     fri_id: int = Field(
         ...,
-        description='Рабочий график пятницы'
+        description='Friday workhours'
     )
     sat_id: int = Field(
         ...,
-        description='Рабочий график субботы'
+        description='Saturday workhours'
     )
 
 
@@ -40,5 +40,5 @@ class SNewSchedule(ScheduleBase):
 class SUpdateSchedule(ScheduleBase):
     id: int = Field(
         ...,
-        description='ID расписания, которое нужно обновить'
+        description='IF of schedule to update'
     )

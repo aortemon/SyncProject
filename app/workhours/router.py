@@ -60,7 +60,7 @@ async def update_workhour(
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Worhour не обновлен. ID={update.id} не найден'
+            detail=f'Worhour was not upodate. ID={update.id} not found'
         )
     return {
         'message': f'Workhour(id={update.id}) successfully updated'

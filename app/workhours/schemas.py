@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from datetime import time
 from app.common.schema import SchemaBase
 
@@ -6,20 +6,32 @@ from app.common.schema import SchemaBase
 class WorkhourBase(SchemaBase):
     starttime: time = Field(
         ...,
-        description='Время начала рабочего дня "HH:MM"'
+        description='Start time of workday "HH:MM"'
     )
     endtime: time = Field(
         ...,
-        description='Время конца рабочего дня "HH:MM"'
+        description='End time of workday "HH:MM"'
     )
     lunchbreak_start: time = Field(
         ...,
-        description='Время начала обеденного перерыва "HH:MM"'
+        description='Lunchbreak start time "HH:MM"'
     )
     lunchbreak_end: time = Field(
         ...,
-        description='Время конца обеденного перерыва "HH:MM"'
+        description='Lunchbreak end time "HH:MM"'
     )
+
+    @model_validator(mode='after')
+    def validate(self):
+        if (
+            self.starttime < self.lunchbreak_start <
+            self.lunchbreak_end < self.endtime
+        ):
+            return self
+        raise ValueError(
+            'time fields are incorrect. Start times should '
+            'come before end time.'
+        )
 
 
 class SNewWorkhour(WorkhourBase):
@@ -29,5 +41,5 @@ class SNewWorkhour(WorkhourBase):
 class SUpdateWorkhour(BaseModel):
     id: int = Field(
         ...,
-        description='ID записи, которую нужно изменить',
+        description='ID of workhour to update',
     )

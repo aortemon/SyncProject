@@ -5,23 +5,23 @@ from app.common.schema import SchemaBase
 class ProjectBase(SchemaBase):
     name: str = Field(
         ...,
-        description='Название проекта'
+        description='Project name'
     )
     description: str = Field(
         ...,
-        description='Описание проекта'
+        description='Project description'
     )
     manager_id: int = Field(
         ...,
-        description='ID менеджера проекта'
+        description='Manager\'s id'
     )
     status_id: int = Field(
         ...,
-        description='ID статуса проекта'
+        description='Status ID'
     )
     release_id: int = Field(
         ...,
-        dsecription='ID релиза, которому принадлежит проект'
+        dsecription='Corresponding release ID'
     )
 
 
@@ -32,5 +32,5 @@ class SNewProject(ProjectBase):
 class SUpdateProject(ProjectBase):
     id: int = Field(
         ...,
-        description='ID релиза, который нужно обновить'
+        description='ID of project to update'
     )
