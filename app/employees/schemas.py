@@ -67,3 +67,10 @@ class EmployeeBase(SchemaBase):
     @classmethod
     def validate_password(cls, value: str) -> str:
         return Validate.password(value)
+
+
+class SUpdateEmployee(EmployeeBase):
+    id: int = Field(
+        ...,
+        description='ID of project to update'
+    )

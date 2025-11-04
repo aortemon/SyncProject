@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.statuses.dao import StatusesDAO
 from app.statuses.schemas import SNewStatus, SUpdateStatus
 from app.employees.models import Employee
-from app.auth.dependencies import get_current_admin_user
+from app.auth.dependencies import require_access, UserRole, ANY_USER
 
 
 router = APIRouter(prefix='/statuses', tags=['Statuses'])
@@ -10,7 +10,7 @@ router = APIRouter(prefix='/statuses', tags=['Statuses'])
 
 @router.get("/all/")
 async def get_all_statuses(
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access(ANY_USER))
 ):
     return await StatusesDAO.find_all()
 
@@ -18,7 +18,7 @@ async def get_all_statuses(
 @router.get('/get_by_id/')
 async def get_status_by_id(
     id: int,
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access(ANY_USER))
 ):
     result = await StatusesDAO.find_one_or_none_by_id(id)
     if result is None:
@@ -32,12 +32,12 @@ async def get_status_by_id(
 @router.post("/add/")
 async def add_status(
     response: Response,
-    new_status: SNewStatus,
-    user_data: Employee = Depends(get_current_admin_user)
+    new_item: SNewStatus,
+    user_data: Employee = Depends(require_access([UserRole.ADMIN]))
 ):
-    await StatusesDAO.add(alias=new_status.alias)
+    await StatusesDAO.add(**new_item.dict())
     return {
-        'message': f'New status "{new_status.alias}" successfully added!'
+        'message': f'New status "{new_item.alias}" successfully added!'
     }
 
 
@@ -45,11 +45,11 @@ async def add_status(
 async def update_status(
     response: Response,
     update: SUpdateStatus,
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access([UserRole.ADMIN]))
 ):
     result = await StatusesDAO.update(
         filter_by={'id': update.id},
-        alias=update.alias
+        **update.dict()
     )
     if result == 0:
         raise HTTPException(

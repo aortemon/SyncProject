@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.schedules.dao import SchedulesDAO
 from app.schedules.schemas import SNewSchedule, SUpdateSchedule
 from app.employees.models import Employee
-from app.auth.dependencies import get_current_admin_user
+from app.auth.dependencies import require_access, UserRole, ANY_USER
 
 
 router = APIRouter(prefix='/schedules', tags=['Schedules'])
@@ -10,7 +10,7 @@ router = APIRouter(prefix='/schedules', tags=['Schedules'])
 
 @router.get("/all/")
 async def get_all_schedules(
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access(ANY_USER))
 ):
     return await SchedulesDAO.find_all()
 
@@ -18,7 +18,7 @@ async def get_all_schedules(
 @router.get('/get_by_id/')
 async def get_schedule_by_id(
     id: int,
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access(ANY_USER))
 ):
     result = await SchedulesDAO.find_one_or_none_by_id(id)
     if result is None:
@@ -32,18 +32,10 @@ async def get_schedule_by_id(
 @router.post("/add/")
 async def add_schedule(
     response: Response,
-    new_schedule: SNewSchedule,
-    user_data: Employee = Depends(get_current_admin_user)
+    new_item: SNewSchedule,
+    user_data: Employee = Depends(require_access([UserRole.ADMIN]))
 ):
-    await SchedulesDAO.add(
-        sun_id=new_schedule.sun_id,
-        mon_id=new_schedule.mon_id,
-        tue_id=new_schedule.tue_id,
-        wed_id=new_schedule.wed_id,
-        thu_id=new_schedule.thu_id,
-        fri_id=new_schedule.fri_id,
-        sat_id=new_schedule.sat_id
-    )
+    await SchedulesDAO.add(**new_item.dict())
     return {
         'message': 'New schedule was added successfully!'
     }
@@ -53,17 +45,11 @@ async def add_schedule(
 async def update_schedule(
     response: Response,
     update: SUpdateSchedule,
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access([UserRole.ADMIN]))
 ):
     result = await SchedulesDAO.update(
         filter_by={'id': update.id},
-        sun_id=update.sun_id,
-        mon_id=update.mon_id,
-        tue_id=update.tue_id,
-        wed_id=update.wed_id,
-        thu_id=update.thu_id,
-        fri_id=update.fri_id,
-        sat_id=update.sat_id
+        **update.dict()
     )
     if result == 0:
         raise HTTPException(
