@@ -1,31 +1,34 @@
-import re
-from pydantic import EmailStr, Field, field_validator
-from datetime import datetime
-from app.common.schema import SchemaBase
+from pydantic import EmailStr, Field, field_validator, PastDate
+from datetime import date, timedelta
+from app.common.schema import SchemaBase, Validate
 
 
 class EmployeeBase(SchemaBase):
     lname: str = Field(
         ...,
         description="Фамилия",
+        examples=['Пупкин'],
         min_length=3,
         max_length=50
     )
     fname: str = Field(
         ...,
         description="Имя",
+        examples=['Василий'],
         min_length=3,
         max_length=50
     )
     mname: str = Field(
         ...,
         description="Отчество",
+        examples=['Акакиевич'],
         min_length=3,
         max_length=50
     )
-    dob: datetime = Field(
+    dob: PastDate = Field(
         ...,
-        description="Дата рождения"
+        description="Дата рождения YYYY-MM-DD",
+        le=date.today() - timedelta(days=365*16)
     )
     schedule_id: int = Field(
         ...,
@@ -38,8 +41,9 @@ class EmployeeBase(SchemaBase):
     phone: str = Field(
         ...,
         description="Сотовый номер",
-        min_length=3,
-        max_length=50
+        examples=["+79051534857"],
+        min_length=12,
+        max_length=12
     )
     email: EmailStr = Field(
         ...,
@@ -50,16 +54,16 @@ class EmployeeBase(SchemaBase):
     password: str = Field(
         ...,
         description="Пароль от 8 дол 50 символов",
-        min_length=8,
-        max_length=50,
+        min_length=12,
+        max_length=48,
     )
 
     @field_validator('phone')
     @classmethod
-    def validate_phone(cls, values: str) -> str:
-        if not re.match(r'^\+\d{5,15}$', values):
-            raise ValueError(
-                'Номер телефона должен начинаться с'
-                ' "+" и содержать от 5 до 15 цифр'
-            )
-        return values
+    def validate_phone(cls, value: str) -> str:
+        return Validate.phone(value)
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return Validate.password(value)

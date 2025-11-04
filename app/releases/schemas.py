@@ -9,7 +9,8 @@ class ReleaseBase(SchemaBase):
     )
     version: str = Field(
         ...,
-        description='Версия релиза'
+        description='Версия релиза',
+        min_length=3
     )
     description: str = Field(
         ...,
