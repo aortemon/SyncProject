@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.departments.dao import DepartmentsDAO
 from app.departments.schemas import SNewDepartment, SUpdateDepartment
 from app.employees.models import Employee
-from app.auth.dependencies import get_current_admin_user
+from app.auth.dependencies import require_access, UserRole, ANY_USER
 
 
 router = APIRouter(prefix='/departments', tags=['Departments'])
@@ -10,7 +10,7 @@ router = APIRouter(prefix='/departments', tags=['Departments'])
 
 @router.get("/all/")
 async def get_all_departments(
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access(ANY_USER))
 ):
     return await DepartmentsDAO.find_all()
 
@@ -18,10 +18,9 @@ async def get_all_departments(
 @router.get('/get_by_id/')
 async def get_department_by_id(
     id: int,
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access(ANY_USER))
 ):
     result = await DepartmentsDAO.find_one_or_none_by_id(id)
-    print(result)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -34,13 +33,10 @@ async def get_department_by_id(
 async def add_department(
     response: Response,
     new_department: SNewDepartment,
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access([UserRole.ADMIN]))
 ):
     print(response)
-    await DepartmentsDAO.add(
-        name=new_department.name,
-        lead_id=new_department.lead_id
-    )
+    await DepartmentsDAO.add(**user_data.dict())
     return {
         'message': 'New department was added successfully!'
     }
@@ -50,17 +46,16 @@ async def add_department(
 async def update_department(
     response: Response,
     update: SUpdateDepartment,
-    user_data: Employee = Depends(get_current_admin_user)
+    user_data: Employee = Depends(require_access([UserRole.ADMIN]))
 ):
     result = await DepartmentsDAO.update(
         filter_by={'id': update.id},
-        name=update.name,
-        lead_id=update.lead_id
+        **update.dict()
     )
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f'Department was not uopdated. ID={update.id} not found'
+            detail=f'Department was not updated. ID={update.id} not found'
         )
     return {
         'message': f'Department(id={update.id}) was updated successfully'

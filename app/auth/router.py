@@ -7,21 +7,24 @@ from app.auth.auth import (
 from app.employees.dao import EmployeesDAO
 from app.auth.schemas import SEmployeeRegister, SUserAuth
 from app.employees.models import Employee
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import require_access, UserRole, ANY_USER
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
 
 @router.post('/register')
-async def register_user(user_data: SEmployeeRegister) -> dict:
-    users = await EmployeesDAO.find_one_or_none(email=user_data.email)
+async def register_user(
+    employee_data: SEmployeeRegister,
+    user_data: Employee = Depends(require_access([UserRole.ADMIN]))
+) -> dict:
+    users = await EmployeesDAO.find_one_or_none(email=employee_data.email)
     if users:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail='Пользователь уже существует'
         )
-    user_dict = user_data.dict()
-    user_dict['password'] = get_password_hash(user_data.password)
+    user_dict = employee_data.dict()
+    user_dict['password'] = get_password_hash(employee_data.password)
     await EmployeesDAO.add(**user_dict)
     return {'message': 'Вы успешно зарегистрированы'}
 
@@ -47,7 +50,7 @@ async def auth_user(response: Response, user_data: SUserAuth):
 
 
 @router.get('/me/')
-async def get_me(user_data: Employee = Depends(get_current_user)):
+async def get_me(user_data: Employee = Depends(require_access(ANY_USER))):
     return user_data
 
 
