@@ -1,6 +1,6 @@
 import json
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import Form, HTTPException
 from pydantic import AfterValidator, Field, FutureDate, ValidationError, model_validator
@@ -19,7 +19,7 @@ FutureOrNowDate = Annotated[date, AfterValidator(validate_future_or_now)]
 
 class TasksBase(SchemaBase):
     creator_id: int = Field(..., description="Creator's ID")
-    executor_id: int = Field(..., description="Executor's ID")
+    executor_id: int | None = None  # Field(..., description="Executor's ID")
     start_date: FutureOrNowDate = Field(..., description="Start date of task execution")
     end_date: FutureDate = Field(..., description="End date of task execution")
     name: str = Field(..., description="Task name", min_length=3, max_length=30)

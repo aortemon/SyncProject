@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Task(Base):
     id: Mapped[int_pk]
     creator_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), nullable=False)
-    executor_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), nullable=False)
+    executor_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), nullable=True)
     created_at: Mapped[created_at]
     start_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
