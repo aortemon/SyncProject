@@ -8,6 +8,7 @@ from app.releases.router import router as router_releases
 from app.projects.router import router as router_projects
 from app.tasks.router import router as router_tasks
 from app.auth.router import router as router_auth
+from app.files.router import router as router_files
 
 app = FastAPI()
 
@@ -26,3 +27,4 @@ app.include_router(router_departments)
 app.include_router(router_releases)
 app.include_router(router_projects)
 app.include_router(router_tasks)
+app.include_router(router_files)
