@@ -1,28 +1,29 @@
+# ruff: noqa: F401
+
 import asyncio
 import sys
-from os.path import dirname, abspath
 from logging.config import fileConfig
+from os.path import abspath, dirname
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
-
-from app.database import DATABASE_URL, Base
-from app.database import File, TaskFile
-from app.database import EmployeeDepartment
-
-from app.roles.models import Role
 from app.departments.models import Department
-from app.statuses.models import Status
+from app.employeedepartments.models import EmployeeDepartment
 from app.employees.models import Employee
-from app.workhours.models import WorkHour
-from app.schedules.models import Schedule
-from app.releases.models import Release
+from app.files.models import File
 from app.projects.models import Project
+from app.releases.models import Release
+from app.roles.models import Role
+from app.schedules.models import Schedule
+from app.statuses.models import Status
+from app.taskfiles.models import TaskFile
 from app.tasks.models import Task
-
+from app.workhours.models import WorkHour
+from database.model import Base
+from database.session import DATABASE_URL
 
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 

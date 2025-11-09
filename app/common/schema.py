@@ -1,7 +1,11 @@
-from pydantic import BaseModel
+import inspect
 import re
 import string
 from datetime import timedelta
+from typing import Annotated, Type
+
+from fastapi import Form
+from pydantic import BaseModel, Field
 
 
 class SchemaBase(BaseModel):
@@ -57,4 +61,18 @@ class Validate:
         if min_delta <= date_after - date_before <= max_delta:
             return cls_proxy
         raise ValueError(msg_on_error)
+    
+def as_form(cls):
+    new_params = [
+        inspect.Parameter(
+            field_name,
+            inspect.Parameter.POSITIONAL_ONLY,
+            default=model_field.default,
+            annotation=Annotated[model_field.annotation, *model_field.metadata, Form()],
+        )
+        for field_name, model_field in cls.model_fields.items()
+    ]
 
+    cls.__signature__ = cls.__signature__.replace(parameters=new_params)
+
+    return cls

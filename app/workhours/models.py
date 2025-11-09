@@ -1,7 +1,7 @@
 from sqlalchemy import Time
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import time
-from app.database import Base, int_pk
+from database.model import Base, int_pk
 
 
 class WorkHour(Base):

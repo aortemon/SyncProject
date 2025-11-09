@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped
-from app.database import Base, int_pk, workhour_fk
+from database.model import Base, int_pk, workhour_fk
 
 
 class Schedule(Base):

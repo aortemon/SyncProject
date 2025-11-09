@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.database import Base, int_pk, str256, created_at, empls_fk
+from database.model import Base, int_pk, str256, created_at, empls_fk
 from app.statuses.models import Status
 from app.employees.models import Employee
 from app.releases.models import Release

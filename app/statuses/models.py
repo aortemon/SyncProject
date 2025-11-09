@@ -1,6 +1,6 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column
-from app.database import Base, int_pk
+from database.model import Base, int_pk
 
 
 class Status(Base):

@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, Response
 from app.employees.dao import EmployeesDAO
 from app.employees.schemas import SUpdateEmployee
 from app.employees.models import Employee
+from app.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.auth.dependencies import require_access, UserRole, ANY_USER
 
 
@@ -21,12 +22,12 @@ async def get_user_by_id(
     user_data: Employee = Depends(require_access(ANY_USER))
 ):
     result = await EmployeesDAO.find_one_or_none_by_id(id)
-    print(result)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"ID = {id} not found"
         )
+
     return result
 
 
@@ -38,10 +39,27 @@ async def update_project(
         require_access([UserRole.ADMIN])
     )
 ):
+    upd_dict = update.dict()
+    departments_list = upd_dict.pop('departments')
     result = await EmployeesDAO.update(
         filter_by={'id': update.id},
-        **update.dict()
+        **upd_dict
     )
+    subquery_result = await EmployeeDepartmentsDAO.add_many(
+        [
+            {
+                'department_id': x['id'],
+                'employee_id': update.id,
+                'office': x['office']
+            } for x in departments_list
+        ]
+    )
+    if subquery_result == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Something wrong with departments'
+        )
+
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -50,4 +68,3 @@ async def update_project(
     return {
         'message': f'Project(id={update.id}) was updated successfully'
     }
-
