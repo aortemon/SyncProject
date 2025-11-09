@@ -66,7 +66,8 @@ async def add_task(
 
     async with async_session_maker() as session:
         async with session.begin():
-            task_insert_result = await TasksDAO.add(**new_item.model_dump())
+            new_item_dict = {**new_item.model_dump(), 'creator_id': user_data.id}
+            task_insert_result = await TasksDAO.add(**new_item_dict)
             if files:
                 for file in files:
                     file_data = SNewFile(filename=file.filename, content_type=file.content_type)  # type: ignore
@@ -109,6 +110,7 @@ async def update_task(
     update: SUpdateTask,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
+    
     result = await TasksDAO.update(filter_by={"id": update.id}, **update.dict())
     if result == 0:
         raise HTTPException(

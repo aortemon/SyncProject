@@ -18,7 +18,6 @@ FutureOrNowDate = Annotated[date, AfterValidator(validate_future_or_now)]
 
 
 class TasksBase(SchemaBase):
-    creator_id: int = Field(..., description="Creator's ID")
     executor_id: int | None = None  # Field(..., description="Executor's ID")
     start_date: FutureOrNowDate = Field(..., description="Start date of task execution")
     end_date: FutureDate = Field(..., description="End date of task execution")
