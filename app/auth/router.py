@@ -5,6 +5,7 @@ from app.auth.auth import (
     create_access_token
 )
 from app.employees.dao import EmployeesDAO
+from app.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.auth.schemas import SEmployeeRegister, SUserAuth
 from app.employees.models import Employee
 from app.auth.dependencies import require_access, UserRole, ANY_USER
@@ -24,8 +25,18 @@ async def register_user(
             detail='Пользователь уже существует'
         )
     user_dict = employee_data.dict()
+    departments_list = user_dict.pop('departments')
     user_dict['password'] = get_password_hash(employee_data.password)
-    await EmployeesDAO.add(**user_dict)
+    new_user_instance = await EmployeesDAO.add(**user_dict)
+    await EmployeeDepartmentsDAO.add_many(
+        [
+            {
+                'department_id': x['id'],
+                'employee_id': new_user_instance.id,
+                'office': x['office']
+            } for x in departments_list
+        ]
+    )
     return {'message': 'Вы успешно зарегистрированы'}
 
 

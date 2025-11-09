@@ -14,7 +14,7 @@ app = FastAPI()
 
 @app.get('/')
 def homepage():
-    return {'message': '<h1>Приветики-минетики</h1>'}
+    return {'message': '<h1>Приветики</h1>'}
 
 
 app.include_router(router_auth)

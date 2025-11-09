@@ -1,6 +1,8 @@
 from pydantic import EmailStr, Field, field_validator, PastDate
 from datetime import date, timedelta
 from app.common.schema import SchemaBase, Validate
+from app.employeedepartments.schemas import SAddEmployeeDepartment
+from typing import List
 
 
 class EmployeeBase(SchemaBase):
@@ -37,6 +39,10 @@ class EmployeeBase(SchemaBase):
     role_id: int = Field(
         ...,
         description="Role ID"
+    )
+    departments: List[SAddEmployeeDepartment] = Field(
+        ...,
+        description="List of departments' IDs where employee works"
     )
     phone: str = Field(
         ...,

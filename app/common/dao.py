@@ -1,13 +1,20 @@
+from typing import Type, TypeVar
+
+from sqlalchemy import delete as sqlalchemy_delete
+from sqlalchemy import update as sqlalchemy_update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
-from sqlalchemy import update as sqlalchemy_update, delete as sqlalchemy_delete
-from app.database import async_session_maker
+from sqlalchemy.orm import DeclarativeBase
+
+from database.session import async_session_maker
 
 # DAO is Data Access Object
 
+T = TypeVar("T", bound=DeclarativeBase)
+
 
 class BaseDAO:
-    model = None
+    model: Type[T] = None  # type: ignore
 
     @classmethod
     async def find_one_or_none_by_id(cls, data_id: int):
@@ -44,6 +51,12 @@ class BaseDAO:
                 return new_instance
 
     @classmethod
+    async def add_with_outer_session(cls, session, **values):
+        new_instance = cls.model(**values)
+        session.add(new_instance)
+        return new_instance
+
+    @classmethod
     async def add_many(cls, instances: list[dict]):
         async with async_session_maker() as session:
             async with session.begin():
@@ -62,11 +75,7 @@ class BaseDAO:
             async with session.begin():
                 query = (
                     sqlalchemy_update(cls.model)
-                    .where(
-                        *[getattr(
-                            cls.model, k
-                        ) == v for k, v in filter_by.items()]
-                    )
+                    .where(*[getattr(cls.model, k) == v for k, v in filter_by.items()])
                     .values(**values)
                     .execution_options(synchronize_session="fetch")
                 )
@@ -76,7 +85,7 @@ class BaseDAO:
                 except SQLAlchemyError as e:
                     await session.rollback()
                     raise e
-                return result.rowcount
+                return getattr(result, "rowcount", -1)
 
     @classmethod
     async def delete(cls, delete_all: bool = False, **filter_by):
@@ -87,11 +96,12 @@ class BaseDAO:
                 )
         async with async_session_maker() as session:
             async with session.begin():
-                query = sqlalchemy_delete(cls.model).filter.by(**filter_by)
+                query = sqlalchemy_delete(cls.model).filter_by(**filter_by)
                 result = await session.execute(query)
                 try:
                     await session.commit()
                 except SQLAlchemyError as e:
                     await session.rollback()
                     raise e
-                return result.rowcount
+                return getattr(result, "rowcount", -1)
+                return getattr(result, "rowcount", -1)
