@@ -10,18 +10,18 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from app.departments.models import Department
-from app.employeedepartments.models import EmployeeDepartment
-from app.employees.models import Employee
-from app.files.models import File
-from app.projects.models import Project
-from app.releases.models import Release
-from app.roles.models import Role
-from app.schedules.models import Schedule
-from app.statuses.models import Status
-from app.taskfiles.models import TaskFile
-from app.tasks.models import Task
-from app.workhours.models import WorkHour
+from app.entities.departments.models import Department
+from app.entities.employeedepartments.models import EmployeeDepartment
+from app.entities.employees.models import Employee
+from app.entities.files.models import File
+from app.entities.projects.models import Project
+from app.entities.releases.models import Release
+from app.entities.roles.models import Role
+from app.entities.schedules.models import Schedule
+from app.entities.statuses.models import Status
+from app.entities.taskfiles.models import TaskFile
+from app.entities.tasks.models import Task
+from app.entities.workhours.models import WorkHour
 from database.model import Base
 from database.session import DATABASE_URL
 
