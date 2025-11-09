@@ -30,6 +30,19 @@ async def get_all_tasks(user_data: Employee = Depends(require_access(ANY_USER)))
     return await TasksDAO.find_all()
 
 
+@router.get("/my_drafts")
+async def get_my_drafts(
+    user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER]))
+):
+    result = await TasksDAO.find_all(creator_id=user_data.id, executor_id=None)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"ID = {id} not found",
+        )
+    return result
+
+
 @router.get("/get_by_id/")
 async def get_task_by_id(
     id: int, user_data: Employee = Depends(require_access(ANY_USER))
