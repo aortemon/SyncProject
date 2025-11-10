@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.entities.departments.models import Department
 from app.entities.employeedepartments.models import EmployeeDepartment
+from app.entities.employeemeetings.models import EmployeeMeeting
 from app.entities.employees.models import Employee
 from app.entities.files.models import File
 from app.entities.meetings.models import Meeting

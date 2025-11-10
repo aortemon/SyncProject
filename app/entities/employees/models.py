@@ -10,6 +10,7 @@ from database.model import Base, int_pk, str256
 
 if TYPE_CHECKING:
     from app.entities.employeedepartments.models import EmployeeDepartment
+    from app.entities.employeemeetings.models import EmployeeMeeting
     from app.entities.vacations.models import Vacation
 
 
@@ -34,6 +35,10 @@ class Employee(Base):
         back_populates="employee",
         lazy="selectin",
         cascade="all, delete-orphan",
+    )
+
+    employee_meetings: Mapped[List["EmployeeMeeting"]] = relationship(
+        "EmployeeMeeting", back_populates="employee"
     )
 
     vacations: Mapped[List["Vacation"]] = relationship(
