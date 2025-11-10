@@ -7,6 +7,7 @@ from app.entities.departments.models import Department
 from app.entities.employeedepartments.models import EmployeeDepartment
 from app.entities.employees.models import Employee
 from app.entities.files.models import File
+from app.entities.meetings.models import Meeting
 from app.entities.projects.models import Project
 from app.entities.releases.models import Release
 from app.entities.roles.models import Role

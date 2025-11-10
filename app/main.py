@@ -4,6 +4,7 @@ from app.entities.auth.router import router as router_auth
 from app.entities.departments.router import router as router_departments
 from app.entities.employees.router import router as router_employees
 from app.entities.files.router import router as router_files
+from app.entities.meetings.router import router as router_meetings
 from app.entities.projects.router import router as router_projects
 from app.entities.releases.router import router as router_releases
 from app.entities.schedules.router import router as router_schedules
@@ -33,3 +34,4 @@ app.include_router(router_files)
 app.include_router(router_files)
 app.include_router(router_files)
 app.include_router(router_vacations)
+app.include_router(router_meetings)

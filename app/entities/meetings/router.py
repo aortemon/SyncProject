@@ -1,23 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
-from app.entities.departments.dao import DepartmentsDAO
-from app.entities.departments.schemas import SNewDepartment, SUpdateDepartment
 from app.entities.employees.models import Employee
+from app.entities.meetings.dao import MeetingsDAO
+from app.entities.meetings.schemas import SNewMeeting, SUpdateMeeting
 
-router = APIRouter(prefix="/departments", tags=["Departments"])
+router = APIRouter(prefix="/meetings", tags=["Meetings"])
 
 
 @router.get("/all/")
-async def get_all_departments(user_data: Employee = Depends(require_access(ANY_USER))):
-    return await DepartmentsDAO.find_all()
+async def get_all_meetings(user_data: Employee = Depends(require_access(ANY_USER))):
+    return await MeetingsDAO.find_all()
 
 
 @router.get("/get_by_id/")
-async def get_department_by_id(
+async def get_meeting_by_id(
     id: int, user_data: Employee = Depends(require_access(ANY_USER))
 ):
-    result = await DepartmentsDAO.find_one_or_none_by_id(id)
+    result = await MeetingsDAO.find_one_or_none_by_id(id)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -27,23 +27,23 @@ async def get_department_by_id(
 
 
 @router.post("/add/")
-async def add_department(
+async def add_meeting(
     response: Response,
-    new_department: SNewDepartment,
-    user_data: Employee = Depends(require_access([UserRole.ADMIN])),
+    new_meeting: SNewMeeting,
+    user_data: Employee = Depends(require_access(ANY_USER)),
 ):
     print(response)
-    await DepartmentsDAO.add(**new_department.dict())
+    await MeetingsDAO.add(**new_meeting.dict())
     return {"message": "New department was added successfully!"}
 
 
 @router.put("/update/")
-async def update_department(
+async def update_meeting(
     response: Response,
-    update: SUpdateDepartment,
-    user_data: Employee = Depends(require_access([UserRole.ADMIN])),
+    update: SUpdateMeeting,
+    user_data: Employee = Depends(require_access(ANY_USER)),
 ):
-    result = await DepartmentsDAO.update(filter_by={"id": update.id}, **update.dict())
+    result = await MeetingsDAO.update(filter_by={"id": update.id}, **update.dict())
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

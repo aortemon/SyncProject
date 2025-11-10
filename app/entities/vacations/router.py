@@ -9,7 +9,7 @@ router = APIRouter(prefix="/vacations", tags=["Vacations"])
 
 
 @router.post("/add/")
-async def add_department(
+async def add_vacation(
     response: Response,
     new_department: SNewVacation,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
@@ -20,7 +20,7 @@ async def add_department(
 
 
 @router.put("/update/")
-async def update_department(
+async def update_vacation(
     response: Response,
     update: SUpdateVacation,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
