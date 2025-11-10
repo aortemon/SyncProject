@@ -21,6 +21,7 @@ from app.entities.schedules.models import Schedule
 from app.entities.statuses.models import Status
 from app.entities.taskfiles.models import TaskFile
 from app.entities.tasks.models import Task
+from app.entities.vacations.models import Vacation
 from app.entities.workhours.models import WorkHour
 from database.model import Base
 from database.session import DATABASE_URL

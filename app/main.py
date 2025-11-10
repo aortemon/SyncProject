@@ -9,6 +9,7 @@ from app.entities.releases.router import router as router_releases
 from app.entities.schedules.router import router as router_schedules
 from app.entities.statuses.router import router as router_statuses
 from app.entities.tasks.router import router as router_tasks
+from app.entities.vacations.router import router as router_vacations
 from app.entities.workhours.router import router as router_workhours
 
 app = FastAPI()
@@ -31,3 +32,4 @@ app.include_router(router_tasks)
 app.include_router(router_files)
 app.include_router(router_files)
 app.include_router(router_files)
+app.include_router(router_vacations)

@@ -1,8 +1,8 @@
 # ruff: noqa: F401
 
-from app.config import get_db_url
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from app.config import get_db_url
 from app.entities.departments.models import Department
 from app.entities.employeedepartments.models import EmployeeDepartment
 from app.entities.employees.models import Employee
@@ -14,6 +14,7 @@ from app.entities.schedules.models import Schedule
 from app.entities.statuses.models import Status
 from app.entities.taskfiles.models import TaskFile
 from app.entities.tasks.models import Task
+from app.entities.vacations.models import Vacation
 from app.entities.workhours.models import WorkHour
 
 DATABASE_URL = get_db_url()
