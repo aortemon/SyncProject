@@ -4,3 +4,4 @@ login.info
 .vscode
 *.env
 user_files/*
+todo.txt

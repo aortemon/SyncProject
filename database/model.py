@@ -6,7 +6,7 @@ from sqlalchemy import ForeignKey, Integer, String, Time, func
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, declared_attr, mapped_column
 
-# from app.employees.models import Employee
+# from app.entities.employees.models import Employee
 
 int_pk = Annotated[int, mapped_column(Integer, primary_key=True)]
 str_unque = Annotated[str, mapped_column(String(256), unique=True)]
