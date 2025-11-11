@@ -88,6 +88,17 @@ class BaseDAO:
                 return getattr(result, "rowcount", -1)
 
     @classmethod
+    async def update_with_outer_session(cls, session, filter_by, **values):
+        query = (
+            sqlalchemy_update(cls.model)
+            .where(*[getattr(cls.model, k) == v for k, v in filter_by.items()])
+            .values(**values)
+            .execution_options(synchronize_session="fetch")
+        )
+        result = await session.execute(query)
+        return getattr(result, "rowcount", -1)
+
+    @classmethod
     async def delete(cls, delete_all: bool = False, **filter_by):
         if delete_all is False:
             if not filter_by:

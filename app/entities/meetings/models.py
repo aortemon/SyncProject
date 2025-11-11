@@ -7,9 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database.model import Base, empls_fk, int_pk, str256
 
 if TYPE_CHECKING:
-    from app.entities.employeedepartments.models import EmployeeDepartment
     from app.entities.employeemeetings.models import EmployeeMeeting
-    from app.entities.employees.models import Employee
 
 
 class Meeting(Base):
@@ -21,5 +19,5 @@ class Meeting(Base):
     link: Mapped[str256]
 
     employee_meetings: Mapped[List["EmployeeMeeting"]] = relationship(
-        "EmployeeMeeting", back_populates="meeting"
+        "EmployeeMeeting", back_populates="meeting", lazy="selectin"
     )

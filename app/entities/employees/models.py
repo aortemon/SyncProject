@@ -38,7 +38,7 @@ class Employee(Base):
     )
 
     employee_meetings: Mapped[List["EmployeeMeeting"]] = relationship(
-        "EmployeeMeeting", back_populates="employee"
+        "EmployeeMeeting", back_populates="employee", lazy="selectin"
     )
 
     vacations: Mapped[List["Vacation"]] = relationship(

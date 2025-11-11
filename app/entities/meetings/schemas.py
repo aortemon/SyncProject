@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from pydantic import Field
 
@@ -15,12 +16,11 @@ class MeetingBase(SchemaBase):
         ..., description="Date and time of meeting", examples=["2026-01-12 14:30:00"]
     )
     link: str = Field(..., description="Link on Meeting", max_length=256)
+    employees: List[int] = Field(..., description="List of invited Employees ID ")
 
 
 class SNewMeeting(MeetingBase): ...
 
 
 class SUpdateMeeting(MeetingBase):
-    id: int = Field(..., description="ID of department to update")
-    id: int = Field(..., description="ID of department to update")
     id: int = Field(..., description="ID of department to update")

@@ -1,6 +1,6 @@
 from app.entities.common.dao import BaseDAO
-from app.entities.employeedepartments.models import EmployeeDepartment
+from app.entities.employeemeetings.models import EmployeeMeeting
 
 
-class EmployeeDepartmentsDAO(BaseDAO):
-    model = EmployeeDepartment
+class EmployeeMeetingsDAO(BaseDAO):
+    model = EmployeeMeeting

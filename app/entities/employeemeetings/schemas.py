@@ -3,9 +3,8 @@ from pydantic import Field
 from app.entities.common.schema import SchemaBase
 
 
-class SAddEmployeeDepartment(SchemaBase):
-    id: int = Field(..., description="Department ID")
-    office: str = Field(
-        ...,
-        description=("Office where employee work in" " department, e. g. 'Каб. 228'"),
-    )
+class SAddNewEmployeeMeeting(SchemaBase):
+    # Assuming that Meeting ID is known
+    # Schema only for use inside /meetings/ route
+    # Self own router is not required, all the needed logic is inside meetings router
+    employee_id: int = Field(..., description="Employee")
