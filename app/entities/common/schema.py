@@ -1,11 +1,41 @@
 import inspect
 import re
 import string
+from copy import deepcopy
 from datetime import timedelta
-from typing import Annotated, Type
+from typing import Annotated, Any, List, Optional, Tuple, Type
 
 from fastapi import Form
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, create_model
+from pydantic.fields import FieldInfo
+
+
+def partial_model(exclude_fields: List[str] | None = None):
+    if exclude_fields is None:
+        exclude_fields = []
+
+    def wrapper(model: Type[BaseModel]) -> Type[BaseModel]:
+        def make_field_optional(
+            field: FieldInfo, default: Any = None
+        ) -> Tuple[Any, FieldInfo]:
+            new = deepcopy(field)
+            new.default = default
+            new.annotation = Optional[field.annotation]  # type: ignore
+            return new.annotation, new
+
+        create_model_alias: Any = create_model  # to ignore linters warning
+        return create_model_alias(
+            f"Partial{model.__name__}",
+            __base__=model,
+            __module__=model.__module__,
+            **{
+                field_name: make_field_optional(field_info)
+                for field_name, field_info in model.model_fields.items()
+                if field_name not in exclude_fields
+            },
+        )
+
+    return wrapper
 
 
 class SchemaBase(BaseModel):
@@ -13,8 +43,9 @@ class SchemaBase(BaseModel):
     @classmethod
     def to_dict(cls):
         return {
-            k: v for k, v in cls.__dict__.items()
-            if not k.startswith('__') and not callable(v)
+            k: v
+            for k, v in cls.__dict__.items()
+            if not k.startswith("__") and not callable(v)
         }
 
 
@@ -22,10 +53,10 @@ class Validate:
 
     @staticmethod
     def phone(value: str):
-        if not re.match(r'^((\+7)([0-9]){10})$', value):
+        if not re.match(r"^((\+7)([0-9]){10})$", value):
             raise ValueError(
-                'Unsupported phone type. Allowed syntax is +7xxxxxxxxxx, '
-                'where x is a digit 0..9'
+                "Unsupported phone type. Allowed syntax is +7xxxxxxxxxx, "
+                "where x is a digit 0..9"
             )
         return value
 
@@ -37,15 +68,17 @@ class Validate:
         has_special_symbols = any(c in string.punctuation for c in value)
 
         if not has_digits:
-            raise ValueError('use digits in your password.')
+            raise ValueError("use digits in your password.")
         if not has_upper_letter:
-            raise ValueError('use uppercase letters in your password.')
+            raise ValueError("use uppercase letters in your password.")
         if not has_lower_letter:
-            raise ValueError('use lowercase letters in your password.')
+            raise ValueError("use lowercase letters in your password.")
         if not has_special_symbols:
-            raise ValueError(f'use special symbols in your password ({
+            raise ValueError(
+                f"use special symbols in your password ({
                 string.punctuation
-            }).')
+            })."
+            )
 
         return value
 
@@ -56,12 +89,13 @@ class Validate:
         date_after,
         min_delta=timedelta(days=1),
         max_delta=timedelta(days=356),
-        msg_on_error='dates are incorrect'
+        msg_on_error="dates are incorrect",
     ):
         if min_delta <= date_after - date_before <= max_delta:
             return cls_proxy
         raise ValueError(msg_on_error)
-    
+
+
 def as_form(cls):
     new_params = [
         inspect.Parameter(
@@ -75,4 +109,6 @@ def as_form(cls):
 
     cls.__signature__ = cls.__signature__.replace(parameters=new_params)
 
+    return cls
+    return cls
     return cls

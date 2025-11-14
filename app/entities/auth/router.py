@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.auth import (
     authenticate_user,
@@ -10,6 +11,7 @@ from app.entities.auth.schemas import SEmployeeRegister, SUserAuth
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
+from database.session import async_session_maker
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -24,20 +26,31 @@ async def register_user(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Пользователь уже существует"
         )
-    user_dict = employee_data.dict()
-    departments_list = user_dict.pop("departments")
-    user_dict["password"] = get_password_hash(employee_data.password)
-    new_user_instance = await EmployeesDAO.add(**user_dict)
-    await EmployeeDepartmentsDAO.add_many(
-        [
-            {
-                "department_id": x["id"],
-                "employee_id": new_user_instance.id,
-                "office": x["office"],
-            }
-            for x in departments_list
-        ]
-    )
+    async with async_session_maker() as session:
+        async with session.begin():
+            user_dict = employee_data.dict()
+            departments_list = user_dict.pop("departments")
+            user_dict["password"] = get_password_hash(employee_data.password)
+            new_user_instance = await EmployeesDAO.add_with_outer_session(
+                session, **user_dict
+            )
+            await session.flush()
+            await EmployeeDepartmentsDAO.add_many_with_outer_session(
+                session,
+                [
+                    {
+                        "department_id": x["id"],
+                        "employee_id": new_user_instance.id,
+                        "office": x["office"],
+                    }
+                    for x in departments_list
+                ],
+            )
+            try:
+                await session.commit()
+            except SQLAlchemyError as e:
+                await session.rollback()
+                raise e
     return {"message": "Вы успешно зарегистрированы"}
 
 
