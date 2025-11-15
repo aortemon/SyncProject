@@ -43,7 +43,7 @@ async def update_department(
 ):
     id = getattr(update, 'id', -1)
     result = await DepartmentsDAO.update(
-        filter_by={"id": id}, **update.dict()
+        filter_by={"id": id}, **update.model_dump()
     )
     if result == 0:
         raise NotFoundError(field="id", value=id)

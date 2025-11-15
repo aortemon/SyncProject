@@ -50,19 +50,20 @@ async def update_project(
             departments_list = None
             if "departments" in upd_dict:
                 departments_list = upd_dict.pop("departments")
+            id = getattr(update, 'id', -1)
             await EmployeesDAO.update_with_outer_session(
-                session, filter_by={"id": getattr(update, 'id', -1)}, **upd_dict
+                session, filter_by={"id": id}, **upd_dict
             )
             await session.flush()
             if departments_list:
-                await EmployeeDepartmentsDAO.delete(employee_id=getattr(update, 'id', -1))
+                await EmployeeDepartmentsDAO.delete(employee_id=id)
                 await session.flush()
                 await EmployeeDepartmentsDAO.add_many_with_outer_session(
                     session,
                     [
                         {
                             "department_id": x["id"],
-                            "employee_id": getattr(update, 'id', -1),
+                            "employee_id": id,
                             "office": x["office"],
                         }
                         for x in departments_list
@@ -73,4 +74,4 @@ async def update_project(
             except Exception as e:
                 await session.rollback()
                 raise e
-    return {"message": f"Project(id={getattr(update, 'id', -1)}) was updated successfully"}
+    return {"message": f"Project(id={id}) was updated successfully"}

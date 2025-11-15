@@ -60,13 +60,6 @@ async def update_meeting(
     update: SUpdateMeeting,
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):
-    # result = await MeetingsDAO.update(filter_by={"id": update.id}, **update.dict())
-    # if result == 0:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail=f"Department was not updated. ID={update.id} not found",
-    #     )
-    # return {"message": f"Department(id={update.id}) was updated successfully"}
     meeting_data = update.model_dump()
     employees = meeting_data.pop("employees")
     async with async_session_maker() as session:
