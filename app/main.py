@@ -11,6 +11,7 @@ from app.entities.departments.router import router as router_departments
 from app.entities.employees.router import router as router_employees
 from app.entities.files.router import router as router_files
 from app.entities.meetings.router import router as router_meetings
+from app.entities.notifications.router import router as router_notifications
 from app.entities.projects.router import router as router_projects
 from app.entities.releases.router import router as router_releases
 from app.entities.schedules.router import router as router_schedules
@@ -36,17 +37,16 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
     logging.error(f"Database error: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"detail": "Database error ocurred", "type": "db_er:sqlalchemy"},
+        content={"detail": f"{exc}", "type": "db_er:sqlalchemy"},
     )
 
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     logging.error(f"HTTP error: {exc}")
-    print("hjere")
     return JSONResponse(
-        status_code=500,
-        content={"detail": "HTTP error ocured", "type": "http_err"},
+        status_code=exc.status_code,
+        content={"detail": f"{str(exc)}", "type": "http_err"},
     )
 
 
@@ -100,3 +100,4 @@ app.include_router(router_files)
 app.include_router(router_files)
 app.include_router(router_vacations)
 app.include_router(router_meetings)
+app.include_router(router_notifications)

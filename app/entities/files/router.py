@@ -14,7 +14,7 @@ router = APIRouter(prefix="/files", tags=["Files"])
 
 
 @router.get("/get_by_id/")
-async def get_task_by_id(
+async def get_file_by_id(
     id: int, user_data: Employee = Depends(require_access(ANY_USER))
 ):
     result = await FilesDAO.find_one_or_none_by_id(id)

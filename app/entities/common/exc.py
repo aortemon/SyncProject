@@ -3,7 +3,13 @@ from typing import Any
 from fastapi import HTTPException, status
 
 
-class DuplicateError(HTTPException):
+class BaseException(HTTPException):
+
+    def __str__(self):
+        return f"{self.status_code}: {self.detail}"
+
+
+class DuplicateError(BaseException):
     def __init__(self, field: str, value: Any):
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
@@ -11,14 +17,14 @@ class DuplicateError(HTTPException):
         )
 
 
-class UnauthorizedError(HTTPException):
+class UnauthorizedError(BaseException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization needed"
         )
 
 
-class AccessDeniedError(HTTPException):
+class AccessDeniedError(BaseException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -26,7 +32,7 @@ class AccessDeniedError(HTTPException):
         )
 
 
-class NotFoundError(HTTPException):
+class NotFoundError(BaseException):
     def __init__(self, field: str, value: Any):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -34,7 +40,7 @@ class NotFoundError(HTTPException):
         )
 
 
-class InvalidRequest(HTTPException):
+class InvalidRequest(BaseException):
     def __init__(self, detail: str):
         super().__init__(
             status_code=status.HTTP_405_METHOD_NOT_ALLOWED,

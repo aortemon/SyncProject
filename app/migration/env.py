@@ -16,6 +16,7 @@ from app.entities.employeemeetings.models import EmployeeMeeting
 from app.entities.employees.models import Employee
 from app.entities.files.models import File
 from app.entities.meetings.models import Meeting
+from app.entities.notifications.models import Notification
 from app.entities.projects.models import Project
 from app.entities.releases.models import Release
 from app.entities.roles.models import Role
