@@ -14,6 +14,7 @@ from fastapi import (
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
+from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.files.dao import FilesDAO
 from app.entities.files.schemas import SNewFile
@@ -36,10 +37,7 @@ async def get_my_drafts(
 ):
     result = await TasksDAO.find_all(creator_id=user_data.id, executor_id=None)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
@@ -49,10 +47,7 @@ async def get_my_tasks(
 ):
     result = await TasksDAO.find_all(creator_id=user_data.id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
@@ -62,10 +57,7 @@ async def get_task_by_id(
 ):
     result = await TasksDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
@@ -123,11 +115,8 @@ async def update_task(
     update: SUpdateTask,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-
-    result = await TasksDAO.update(filter_by={"id": update.id}, **update.dict())
+    id = getattr(update, "id", -1)
+    result = await TasksDAO.update(filter_by={"id": id}, **update.model_dump())
     if result == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"task was not updated. ID={update.id} not found",
-        )
-    return {"message": f"Task(id={update.id}) was updated successfully"}
+        raise NotFoundError(field="id", value=id)
+    return {"message": f"Task(id={id}) was updated successfully"}

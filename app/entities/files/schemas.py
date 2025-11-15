@@ -34,4 +34,3 @@ class SNewFile(FileBase):
     @property
     def source(self) -> str:
         return "/" + self.hashname
-        return "/" + self.hashname

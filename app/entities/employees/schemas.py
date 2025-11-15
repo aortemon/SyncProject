@@ -28,6 +28,7 @@ class EmployeeBase(SchemaBase):
         le=date.today() - timedelta(days=365 * 16),
     )
     schedule_id: int = Field(..., description="Schedule ID")
+    position: str = Field(..., description="Position of employee")
     role_id: int = Field(..., description="Role ID")
     departments: List[SAddEmployeeDepartment] = Field(
         ..., description="List of departments' IDs where employee works"

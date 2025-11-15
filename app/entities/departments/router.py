@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
+from app.entities.common.exc import DuplicateError, NotFoundError, UnauthorizedError
 from app.entities.departments.dao import DepartmentsDAO
 from app.entities.departments.schemas import SNewDepartment, SUpdateDepartment
 from app.entities.employees.models import Employee
@@ -19,10 +20,7 @@ async def get_department_by_id(
 ):
     result = await DepartmentsDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
@@ -43,10 +41,12 @@ async def update_department(
     update: SUpdateDepartment,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    result = await DepartmentsDAO.update(filter_by={"id": update.id}, **update.dict())
+    id = getattr(update, 'id', -1)
+    result = await DepartmentsDAO.update(
+        filter_by={"id": id}, **update.dict()
+    )
     if result == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Department was not updated. ID={update.id} not found",
-        )
-    return {"message": f"Department(id={update.id}) was updated successfully"}
+        raise NotFoundError(field="id", value=id)
+    return {
+        "message": f"Department(id={id}) was updated successfully"
+    }

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from app.entities.auth.dependencies import ANY_USER, require_access
+from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.files.dao import FilesDAO
 
@@ -18,10 +19,7 @@ async def get_task_by_id(
 ):
     result = await FilesDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
 
     src = Path.home() / "SyncProject" / "user_files" / result.source[1:]
     print(src)

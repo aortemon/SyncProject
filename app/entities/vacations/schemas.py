@@ -2,7 +2,7 @@ from datetime import date
 
 from pydantic import Field
 
-from app.entities.common.schema import SchemaBase
+from app.entities.common.schema import SchemaBase, partial_model
 
 
 class VacationBase(SchemaBase):
@@ -14,6 +14,6 @@ class VacationBase(SchemaBase):
 class SNewVacation(VacationBase): ...
 
 
+@partial_model(exclude_fields=["id"])
 class SUpdateVacation(VacationBase):
-
     id: int = Field(..., description="ID of department to update")

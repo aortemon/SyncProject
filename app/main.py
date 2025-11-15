@@ -1,4 +1,9 @@
-from fastapi import FastAPI
+import logging
+
+from asyncpg import ForeignKeyViolationError, UniqueViolationError
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from app.entities.auth.router import router as router_auth
 from app.entities.departments.router import router as router_departments
@@ -13,7 +18,53 @@ from app.entities.tasks.router import router as router_tasks
 from app.entities.vacations.router import router as router_vacations
 from app.entities.workhours.router import router as router_workhours
 
+logger = logging.getLogger(__name__)
 app = FastAPI()
+
+
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
+    logging.error(f"Database error: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Database error ocurred", "type": "db_er:sqlalchemy"},
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: SQLAlchemyError):
+    logging.error(f"HTTP error: {exc}")
+    print("hjere")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "HTTP error ocured", "type": "http_err"},
+    )
+
+
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(request: Request, exc: IntegrityError):
+    logging.error(f"Database error: {exc}")
+
+    orig_exc = exc.orig
+
+    if isinstance(orig_exc, UniqueViolationError):
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Resource already exists", "type": "db_err:duplicate"},
+        )
+    elif isinstance(orig_exc, ForeignKeyViolationError):
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": "Referenced resource does not exist",
+                "type": "db_err:foreign_key",
+            },
+        )
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Data integrity error", "type": "db_err:integrity"},
+    )
 
 
 @app.get("/")

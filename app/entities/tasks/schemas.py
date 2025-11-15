@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import Form, HTTPException
 from pydantic import AfterValidator, Field, FutureDate, ValidationError, model_validator
 
-from app.entities.common.schema import SchemaBase, Validate, as_form
+from app.entities.common.schema import SchemaBase, Validate, as_form, partial_model
 
 
 def validate_future_or_now(v: date) -> date:
@@ -49,6 +49,6 @@ class SNewTask(TasksBase):
             raise HTTPException(400, f"Invalid task data: {e}")
 
 
+@partial_model(exclude_fields=['id'])
 class SUpdateTask(TasksBase):
-    id: int = Field(..., description="ID of task to update")
     id: int = Field(..., description="ID of task to update")
