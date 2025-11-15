@@ -16,6 +16,6 @@ class ScheduleBase(SchemaBase):
 class SNewSchedule(ScheduleBase): ...
 
 
-@partial_model(exclude_fields=['id'])
+@partial_model(required_fields=["id"])
 class SUpdateSchedule(ScheduleBase):
     id: int = Field(..., description="IF of schedule to update")

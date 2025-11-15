@@ -22,6 +22,6 @@ class MeetingBase(SchemaBase):
 class SNewMeeting(MeetingBase): ...
 
 
-@partial_model(exclude_fields=["id"])
+@partial_model(required_fields=["id"])
 class SUpdateMeeting(MeetingBase):
     id: int = Field(..., description="ID of department to update")

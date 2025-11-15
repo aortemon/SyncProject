@@ -6,13 +6,30 @@ from datetime import timedelta
 from typing import Annotated, Any, List, Optional, Tuple, Type
 
 from fastapi import Form
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, create_model, model_validator
 from pydantic.fields import FieldInfo
 
+from app.entities.common.exc import InvalidRequest
 
-def partial_model(exclude_fields: List[str] | None = None):
-    if exclude_fields is None:
-        exclude_fields = []
+
+@model_validator(mode="after")
+def validate_at_least_one_unrequired(self: BaseModel):
+    required_fields = ["id"]
+    filled_fields = [
+        field_name
+        for field_name, field_value in self.model_dump(exclude_none=True).items()
+        if field_name not in required_fields and field_value is not None
+    ]
+    if len(filled_fields) < 1:
+        raise InvalidRequest(
+            detail="Not enough unrequired fields filled in request body"
+        )
+    return self
+
+
+def partial_model(required_fields: List[str] | None = None):
+    if required_fields is None:
+        required_fields = []
 
     def wrapper(model: Type[BaseModel]) -> Type[BaseModel]:
         def make_field_optional(
@@ -24,16 +41,20 @@ def partial_model(exclude_fields: List[str] | None = None):
             return new.annotation, new
 
         create_model_alias: Any = create_model  # to ignore linters warning
-        return create_model_alias(
+        partial_model_class = create_model_alias(
             f"Partial{model.__name__}",
             __base__=model,
             __module__=model.__module__,
+            __validators__={
+                "validate_number_of_unrequired_fields": validate_at_least_one_unrequired
+            },
             **{
                 field_name: make_field_optional(field_info)
                 for field_name, field_info in model.model_fields.items()
-                if field_name not in exclude_fields
+                if field_name not in required_fields
             },
         )
+        return partial_model_class
 
     return wrapper
 
@@ -75,9 +96,7 @@ class Validate:
             raise ValueError("use lowercase letters in your password.")
         if not has_special_symbols:
             raise ValueError(
-                f"use special symbols in your password ({
-                string.punctuation
-            })."
+                f"use special symbols in your password ({string.punctuation})."
             )
 
         return value
@@ -109,6 +128,5 @@ def as_form(cls):
 
     cls.__signature__ = cls.__signature__.replace(parameters=new_params)
 
-    return cls
     return cls
     return cls

@@ -58,7 +58,7 @@ async def update_meeting(
     update: SUpdateMeeting,
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):
-    meeting_data = update.model_dump()
+    meeting_data = update.model_dump(exclude_none=True)
     employees = meeting_data.pop("employees")
     async with async_session_maker() as session:
         async with session.begin():

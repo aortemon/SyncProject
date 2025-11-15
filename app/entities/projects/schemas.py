@@ -14,6 +14,6 @@ class ProjectBase(SchemaBase):
 class SNewProject(ProjectBase): ...
 
 
-@partial_model(exclude_fields=["id"])
+@partial_model(required_fields=["id"])
 class SUpdateProject(ProjectBase):
     id: int = Field(..., description="ID of project to update")

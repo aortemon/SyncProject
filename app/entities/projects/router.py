@@ -38,8 +38,9 @@ async def update_project(
     update: SUpdateProject,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-    id = getattr(update, "id", -1)
-    result = await ProjectDAO.update(filter_by={"id": id}, **update.model_dump())
+    upd_dict = update.model_dump(exclude_none=True)
+    id = upd_dict["id"]
+    result = await ProjectDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
     return {"message": f"Project(id={id}) was updated successfully"}

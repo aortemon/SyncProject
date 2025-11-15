@@ -38,8 +38,9 @@ async def update_schedule(
     update: SUpdateSchedule,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    id = getattr(update, "id", -1)
-    result = await SchedulesDAO.update(filter_by={"id": id}, **update.model_dump())
+    upd_dict = update.model_dump(exclude_none=True)
+    id = upd_dict["id"]
+    result = await SchedulesDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

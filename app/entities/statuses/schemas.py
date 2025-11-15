@@ -12,6 +12,6 @@ class StatusBase(SchemaBase):
 class SNewStatus(StatusBase): ...
 
 
-@partial_model(exclude_fields=['id'])
+@partial_model(required_fields=["id"])
 class SUpdateStatus(StatusBase):
     id: int = Field(..., description="ID of status to update")

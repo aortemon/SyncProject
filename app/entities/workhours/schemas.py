@@ -23,7 +23,7 @@ class WorkhourBase(SchemaBase):
 class SNewWorkhour(WorkhourBase): ...
 
 
-@partial_model(exclude_fields=["id"])
+@partial_model(required_fields=["id"])
 class SUpdateWorkhour(BaseModel):
     id: int = Field(
         ...,

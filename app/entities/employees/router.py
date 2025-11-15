@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends
 
-
 from app.entities.auth.auth import get_password_hash
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
-from app.entities.common.exc import NotFoundError, InvalidRequest
+from app.entities.common.exc import InvalidRequest, NotFoundError
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
@@ -36,20 +35,14 @@ async def update_project(
 ):
     async with async_session_maker() as session:
         async with session.begin():
-            upd_dict = update.model_dump()
-            upd_dict = {k: v for k, v in upd_dict.items() if v is not None}
-            
-            if 'id' not in upd_dict:
-                raise InvalidRequest(detail="request body should contain 'id' argument")
-            if len(upd_dict) < 2:
-                raise InvalidRequest(detail="nothing to update, not enoguh arguments")
-            
+            upd_dict = update.model_dump(exclude_none=True)
+            id = upd_dict["id"]
             if "password" in upd_dict:
                 upd_dict["password"] = get_password_hash(upd_dict["password"])
             departments_list = None
             if "departments" in upd_dict:
                 departments_list = upd_dict.pop("departments")
-            id = getattr(update, 'id', -1)
+            id = getattr(update, "id", -1)
             await EmployeesDAO.update_with_outer_session(
                 session, filter_by={"id": id}, **upd_dict
             )

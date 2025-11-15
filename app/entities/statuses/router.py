@@ -38,8 +38,9 @@ async def update_status(
     update: SUpdateStatus,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    id = getattr(update, "id", -1)
-    result = await StatusesDAO.update(filter_by={"id": id}, **update.model_dump())
+    upd_dict = update.model_dump(exclude_none=True)
+    id = upd_dict["id"]
+    result = await StatusesDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
     return {

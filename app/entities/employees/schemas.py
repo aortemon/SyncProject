@@ -59,6 +59,6 @@ class EmployeeBase(SchemaBase):
         return Validate.password(value)
 
 
-@partial_model(exclude_fields=["id"])
+@partial_model(required_fields=["id"])
 class SUpdateEmployee(EmployeeBase):
     id: int = Field(..., description="ID of project to update")

@@ -11,12 +11,12 @@ class VacationBase(SchemaBase):
     end_day: date = Field(..., description="Date when vacation ends")
 
     @model_validator(mode="after")
-    def validate_date_range(cls):
+    def validate(self):
 
         return Validate.dates_range(
-            cls,
-            cls.start_day,
-            cls.end_day,
+            self,
+            self.start_day,
+            self.end_day,
             min_delta=timedelta(days=1),
             max_delta=timedelta(days=365),
         )
@@ -25,6 +25,6 @@ class VacationBase(SchemaBase):
 class SNewVacation(VacationBase): ...
 
 
-@partial_model(exclude_fields=["id"])
+@partial_model(required_fields=["id"])
 class SUpdateVacation(VacationBase):
     id: int = Field(..., description="ID of department to update")

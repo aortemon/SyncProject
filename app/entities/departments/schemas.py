@@ -11,6 +11,6 @@ class DepartmentBase(SchemaBase):
 class SNewDepartment(DepartmentBase): ...
 
 
-@partial_model(exclude_fields=["id"])
+@partial_model(required_fields=["id"])
 class SUpdateDepartment(DepartmentBase):
     id: int = Field(..., description="ID of department to update")

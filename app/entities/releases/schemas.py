@@ -13,6 +13,6 @@ class ReleaseBase(SchemaBase):
 class SNewRelease(ReleaseBase): ...
 
 
-@partial_model(exclude_fields=['id'])
+@partial_model(required_fields=["id"])
 class SUpdateRelease(ReleaseBase):
     id: int = Field(..., description="ID of release to update")

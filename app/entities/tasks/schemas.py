@@ -49,6 +49,6 @@ class SNewTask(TasksBase):
             raise HTTPException(400, f"Invalid task data: {e}")
 
 
-@partial_model(exclude_fields=['id'])
+@partial_model(required_fields=["id"])
 class SUpdateTask(TasksBase):
     id: int = Field(..., description="ID of task to update")
