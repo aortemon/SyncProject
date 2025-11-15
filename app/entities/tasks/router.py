@@ -2,15 +2,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    HTTPException,
-    Response,
-    UploadFile,
-    status,
-)
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
@@ -63,7 +55,6 @@ async def get_task_by_id(
 
 @router.post("/add/")
 async def add_task(
-    response: Response,
     new_item: SNewTask = Depends(),
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
     files: Optional[List[UploadFile]] = File(None),
@@ -111,7 +102,6 @@ async def add_task(
 
 @router.put("/update/")
 async def update_task(
-    response: Response,
     update: SUpdateTask,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):

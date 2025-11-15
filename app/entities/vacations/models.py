@@ -1,7 +1,7 @@
 from datetime import date
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, String
+from sqlalchemy import Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.model import Base, empls_fk, int_pk

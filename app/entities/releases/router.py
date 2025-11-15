@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
 from app.entities.common.exc import NotFoundError
@@ -20,13 +20,12 @@ async def get_release_by_id(
 ):
     result = await ReleasesDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise NotFoundError(field='id', value=id)
+        raise NotFoundError(field="id", value=id)
     return result
 
 
 @router.post("/add/")
 async def add_release(
-    response: Response,
     new_item: SNewRelease,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
@@ -36,12 +35,11 @@ async def add_release(
 
 @router.put("/update/")
 async def update_release(
-    response: Response,
     update: SUpdateRelease,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-    id = getattr(update, 'id', -1)
+    id = getattr(update, "id", -1)
     result = await ReleasesDAO.update(filter_by={"id": id}, **update.model_dump())
     if result == 0:
-        raise NotFoundError(field='id', value=id)
+        raise NotFoundError(field="id", value=id)
     return {"message": f"Release(id={id}) was updated successfully"}

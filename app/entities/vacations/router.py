@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 from app.entities.auth.dependencies import UserRole, require_access
 from app.entities.common.exc import NotFoundError
@@ -11,7 +11,6 @@ router = APIRouter(prefix="/vacations", tags=["Vacations"])
 
 @router.post("/add/")
 async def add_vacation(
-    response: Response,
     new_department: SNewVacation,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
@@ -21,7 +20,6 @@ async def add_vacation(
 
 @router.put("/update/")
 async def update_vacation(
-    response: Response,
     update: SUpdateVacation,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):

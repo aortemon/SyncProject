@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.dependencies import ANY_USER, require_access
@@ -29,7 +29,6 @@ async def get_meeting_by_id(
 
 @router.post("/add/")
 async def add_meeting(
-    response: Response,
     new_meeting: SNewMeeting,
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):
@@ -56,7 +55,6 @@ async def add_meeting(
 
 @router.put("/update/")
 async def update_meeting(
-    response: Response,
     update: SUpdateMeeting,
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):

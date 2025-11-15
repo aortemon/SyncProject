@@ -2,7 +2,7 @@ from io import BytesIO
 from pathlib import Path
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 from app.entities.auth.dependencies import ANY_USER, require_access

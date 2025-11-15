@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
 from app.entities.common.exc import NotFoundError
@@ -26,7 +26,6 @@ async def get_workhour_by_id(
 
 @router.post("/add/")
 async def add_workhour(
-    response: Response,
     new_item: SNewWorkhour,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
@@ -36,7 +35,6 @@ async def add_workhour(
 
 @router.put("/update/")
 async def update_workhour(
-    response: Response,
     update: SUpdateWorkhour,
     user_Data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):

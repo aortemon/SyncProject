@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 
 from app.entities.auth.auth import get_password_hash
@@ -31,7 +31,6 @@ async def get_user_by_id(
 
 @router.put("/update/")
 async def update_project(
-    response: Response,
     update: SUpdateEmployee,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):

@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
-from app.entities.common.exc import DuplicateError, NotFoundError, UnauthorizedError
+from app.entities.common.exc import NotFoundError
 from app.entities.departments.dao import DepartmentsDAO
 from app.entities.departments.schemas import SNewDepartment, SUpdateDepartment
 from app.entities.employees.models import Employee
@@ -26,18 +26,15 @@ async def get_department_by_id(
 
 @router.post("/add/")
 async def add_department(
-    response: Response,
     new_department: SNewDepartment,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    print(response)
     await DepartmentsDAO.add(**new_department.dict())
     return {"message": "New department was added successfully!"}
 
 
 @router.put("/update/")
 async def update_department(
-    response: Response,
     update: SUpdateDepartment,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):

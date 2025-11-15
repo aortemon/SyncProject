@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
 from app.entities.common.exc import NotFoundError
@@ -26,7 +26,6 @@ async def get_schedule_by_id(
 
 @router.post("/add/")
 async def add_schedule(
-    response: Response,
     new_item: SNewSchedule,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
@@ -36,7 +35,6 @@ async def add_schedule(
 
 @router.put("/update/")
 async def update_schedule(
-    response: Response,
     update: SUpdateSchedule,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
 from app.entities.common.exc import NotFoundError
@@ -26,7 +26,6 @@ async def get_project_by_id(
 
 @router.post("/add/")
 async def add_project(
-    response: Response,
     new_item: SNewProject,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
@@ -36,7 +35,6 @@ async def add_project(
 
 @router.put("/update/")
 async def update_project(
-    response: Response,
     update: SUpdateProject,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
