@@ -2,7 +2,7 @@ from datetime import time
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.entities.common.schema import SchemaBase
+from app.entities.common.schema import SchemaBase, partial_model
 
 
 class WorkhourBase(SchemaBase):
@@ -23,6 +23,7 @@ class WorkhourBase(SchemaBase):
 class SNewWorkhour(WorkhourBase): ...
 
 
+@partial_model(required_fields=["id"])
 class SUpdateWorkhour(BaseModel):
     id: int = Field(
         ...,

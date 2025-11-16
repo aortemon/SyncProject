@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
+from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.projects.dao import ProjectDAO
 from app.entities.projects.schemas import SNewProject, SUpdateProject
@@ -19,16 +20,12 @@ async def get_project_by_id(
 ):
     result = await ProjectDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
 @router.post("/add/")
 async def add_project(
-    response: Response,
     new_item: SNewProject,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
@@ -38,14 +35,12 @@ async def add_project(
 
 @router.put("/update/")
 async def update_project(
-    response: Response,
     update: SUpdateProject,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-    result = await ProjectDAO.update(filter_by={"id": update.id}, **update.dict())
+    upd_dict = update.model_dump(exclude_none=True)
+    id = upd_dict["id"]
+    result = await ProjectDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Project was not updated. ID={update.id} not found",
-        )
-    return {"message": f"Project(id={update.id}) was updated successfully"}
+        raise NotFoundError(field="id", value=id)
+    return {"message": f"Project(id={id}) was updated successfully"}

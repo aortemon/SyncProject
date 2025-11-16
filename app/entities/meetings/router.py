@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.dependencies import ANY_USER, require_access
+from app.entities.common.exc import NotFoundError
 from app.entities.employeemeetings.dao import EmployeeMeetingsDAO
 from app.entities.employees.models import Employee
 from app.entities.meetings.dao import MeetingsDAO
@@ -22,16 +23,12 @@ async def get_meeting_by_id(
 ):
     result = await MeetingsDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
 @router.post("/add/")
 async def add_meeting(
-    response: Response,
     new_meeting: SNewMeeting,
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):
@@ -45,13 +42,9 @@ async def add_meeting(
             await session.flush()
             if meeting_result:
                 for empl in employees:
-                    res = await EmployeeMeetingsDAO.add_with_outer_session(
-                        session, meeting_id=meeting_result.id, employee_id=empl # type: ignore
+                    await EmployeeMeetingsDAO.add_with_outer_session(
+                        session, meeting_id=meeting_result.id, employee_id=empl  # type: ignore
                     )
-                    if not res:
-                        raise HTTPException(
-                            status_code=500, detail="Somnething went wrong"
-                        )
         try:
             await session.commit()
         except SQLAlchemyError as e:
@@ -62,31 +55,25 @@ async def add_meeting(
 
 @router.put("/update/")
 async def update_meeting(
-    response: Response,
     update: SUpdateMeeting,
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):
-    # result = await MeetingsDAO.update(filter_by={"id": update.id}, **update.dict())
-    # if result == 0:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail=f"Department was not updated. ID={update.id} not found",
-    #     )
-    # return {"message": f"Department(id={update.id}) was updated successfully"}
-    meeting_data = update.model_dump()
-    employees = meeting_data.pop('employees')
+    meeting_data = update.model_dump(exclude_none=True)
+    employees = meeting_data.pop("employees")
     async with async_session_maker() as session:
         async with session.begin():
             meeting_result = await MeetingsDAO.update_with_outer_session(
-                    session, filter_by={'id': meeting_data['id']}, **meeting_data
+                session, filter_by={"id": meeting_data["id"]}, **meeting_data
             )
             await session.flush()
-            res = await EmployeeMeetingsDAO.delete(delete_all=True, meeting_id=meeting_data['id'])
+            res = await EmployeeMeetingsDAO.delete(
+                delete_all=True, meeting_id=meeting_data["id"]
+            )
             await session.flush()
             if meeting_result:
                 for empl in employees:
                     res = await EmployeeMeetingsDAO.add_with_outer_session(
-                        session, meeting_id=meeting_data['id'], employee_id=empl
+                        session, meeting_id=meeting_data["id"], employee_id=empl
                     )
                     if not res:
                         raise HTTPException(

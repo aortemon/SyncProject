@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.entities.common.schema import SchemaBase
+from app.entities.common.schema import SchemaBase, partial_model
 
 
 class ScheduleBase(SchemaBase):
@@ -16,5 +16,6 @@ class ScheduleBase(SchemaBase):
 class SNewSchedule(ScheduleBase): ...
 
 
+@partial_model(required_fields=["id"])
 class SUpdateSchedule(ScheduleBase):
     id: int = Field(..., description="IF of schedule to update")

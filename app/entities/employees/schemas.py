@@ -3,11 +3,12 @@ from typing import List
 
 from pydantic import EmailStr, Field, PastDate, field_validator
 
-from app.entities.common.schema import SchemaBase, Validate
+from app.entities.common.schema import SchemaBase, Validate, partial_model
 from app.entities.employeedepartments.schemas import SAddEmployeeDepartment
 
 
 class EmployeeBase(SchemaBase):
+
     lname: str = Field(
         ..., description="Last name", examples=["Пупкин"], min_length=3, max_length=50
     )
@@ -27,6 +28,7 @@ class EmployeeBase(SchemaBase):
         le=date.today() - timedelta(days=365 * 16),
     )
     schedule_id: int = Field(..., description="Schedule ID")
+    position: str = Field(..., description="Position of employee")
     role_id: int = Field(..., description="Role ID")
     departments: List[SAddEmployeeDepartment] = Field(
         ..., description="List of departments' IDs where employee works"
@@ -57,5 +59,6 @@ class EmployeeBase(SchemaBase):
         return Validate.password(value)
 
 
+@partial_model(required_fields=["id"])
 class SUpdateEmployee(EmployeeBase):
     id: int = Field(..., description="ID of project to update")

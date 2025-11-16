@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.entities.common.schema import SchemaBase
+from app.entities.common.schema import SchemaBase, partial_model
 
 
 class ReleaseBase(SchemaBase):
@@ -13,5 +13,6 @@ class ReleaseBase(SchemaBase):
 class SNewRelease(ReleaseBase): ...
 
 
+@partial_model(required_fields=["id"])
 class SUpdateRelease(ReleaseBase):
     id: int = Field(..., description="ID of release to update")

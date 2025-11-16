@@ -2,18 +2,11 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    HTTPException,
-    Response,
-    UploadFile,
-    status,
-)
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
+from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.files.dao import FilesDAO
 from app.entities.files.schemas import SNewFile
@@ -36,10 +29,7 @@ async def get_my_drafts(
 ):
     result = await TasksDAO.find_all(creator_id=user_data.id, executor_id=None)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
@@ -49,10 +39,7 @@ async def get_my_tasks(
 ):
     result = await TasksDAO.find_all(creator_id=user_data.id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
@@ -62,16 +49,12 @@ async def get_task_by_id(
 ):
     result = await TasksDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
 @router.post("/add/")
 async def add_task(
-    response: Response,
     new_item: SNewTask = Depends(),
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
     files: Optional[List[UploadFile]] = File(None),
@@ -119,15 +102,12 @@ async def add_task(
 
 @router.put("/update/")
 async def update_task(
-    response: Response,
     update: SUpdateTask,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-
-    result = await TasksDAO.update(filter_by={"id": update.id}, **update.dict())
+    upd_dict = update.model_dump(exclude_none=True)
+    id = upd_dict["id"]
+    result = await TasksDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"task was not updated. ID={update.id} not found",
-        )
-    return {"message": f"Task(id={update.id}) was updated successfully"}
+        raise NotFoundError(field="id", value=id)
+    return {"message": f"Task(id={id}) was updated successfully"}

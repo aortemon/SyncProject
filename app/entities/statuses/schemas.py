@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.entities.common.schema import SchemaBase
+from app.entities.common.schema import SchemaBase, partial_model
 
 
 class StatusBase(SchemaBase):
@@ -12,5 +12,6 @@ class StatusBase(SchemaBase):
 class SNewStatus(StatusBase): ...
 
 
+@partial_model(required_fields=["id"])
 class SUpdateStatus(StatusBase):
     id: int = Field(..., description="ID of status to update")

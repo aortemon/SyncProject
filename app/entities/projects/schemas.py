@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from app.entities.common.schema import SchemaBase
+from app.entities.common.schema import SchemaBase, partial_model
 
 
 class ProjectBase(SchemaBase):
@@ -14,5 +14,6 @@ class ProjectBase(SchemaBase):
 class SNewProject(ProjectBase): ...
 
 
+@partial_model(required_fields=["id"])
 class SUpdateProject(ProjectBase):
     id: int = Field(..., description="ID of project to update")

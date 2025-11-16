@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
+from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.releases.dao import ReleasesDAO
 from app.entities.releases.schemas import SNewRelease, SUpdateRelease
@@ -19,16 +20,12 @@ async def get_release_by_id(
 ):
     result = await ReleasesDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
 @router.post("/add/")
 async def add_release(
-    response: Response,
     new_item: SNewRelease,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
@@ -38,14 +35,12 @@ async def add_release(
 
 @router.put("/update/")
 async def update_release(
-    response: Response,
     update: SUpdateRelease,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-    result = await ReleasesDAO.update(filter_by={"id": update.id}, **update.dict())
+    upd_dict = update.model_dump(exclude_none=True)
+    id = upd_dict["id"]
+    result = await ReleasesDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Release was not updated. ID={update.id} ",
-        )
-    return {"message": f"Release(id={update.id}) was updated successfully"}
+        raise NotFoundError(field="id", value=id)
+    return {"message": f"Release(id={id}) was updated successfully"}

@@ -18,6 +18,7 @@ from app.entities.taskfiles.models import TaskFile
 from app.entities.tasks.models import Task
 from app.entities.vacations.models import Vacation
 from app.entities.workhours.models import WorkHour
+from app.entities.notifications.models import Notification
 
 DATABASE_URL = get_db_url()
 

@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends
 
+from app.entities.auth.auth import get_password_hash
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
+from app.entities.common.exc import InvalidRequest, NotFoundError
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
 from app.entities.employees.schemas import SUpdateEmployee
+from database.session import async_session_maker
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
@@ -20,39 +23,47 @@ async def get_user_by_id(
 ):
     result = await EmployeesDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
 
     return result
 
 
 @router.put("/update/")
 async def update_project(
-    response: Response,
     update: SUpdateEmployee,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    upd_dict = update.dict()
-    departments_list = upd_dict.pop("departments")
-    result = await EmployeesDAO.update(filter_by={"id": update.id}, **upd_dict)
-    subquery_result = await EmployeeDepartmentsDAO.add_many(
-        [
-            {"department_id": x["id"], "employee_id": update.id, "office": x["office"]}
-            for x in departments_list
-        ]
-    )
-    if subquery_result == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Something wrong with departments",
-        )
-
-    if result == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Project was not updated. ID={update.id} not found",
-        )
-    return {"message": f"Project(id={update.id}) was updated successfully"}
-    return {"message": f"Project(id={update.id}) was updated successfully"}
+    async with async_session_maker() as session:
+        async with session.begin():
+            upd_dict = update.model_dump(exclude_none=True)
+            id = upd_dict["id"]
+            if "password" in upd_dict:
+                upd_dict["password"] = get_password_hash(upd_dict["password"])
+            departments_list = None
+            if "departments" in upd_dict:
+                departments_list = upd_dict.pop("departments")
+            id = getattr(update, "id", -1)
+            await EmployeesDAO.update_with_outer_session(
+                session, filter_by={"id": id}, **upd_dict
+            )
+            await session.flush()
+            if departments_list:
+                await EmployeeDepartmentsDAO.delete(employee_id=id)
+                await session.flush()
+                await EmployeeDepartmentsDAO.add_many_with_outer_session(
+                    session,
+                    [
+                        {
+                            "department_id": x["id"],
+                            "employee_id": id,
+                            "office": x["office"],
+                        }
+                        for x in departments_list
+                    ],
+                )
+            try:
+                await session.commit()
+            except Exception as e:
+                await session.rollback()
+                raise e
+    return {"message": f"Project(id={id}) was updated successfully"}

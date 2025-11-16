@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import Field
 
-from app.entities.common.schema import SchemaBase
+from app.entities.common.schema import SchemaBase, partial_model
 
 
 class MeetingBase(SchemaBase):
@@ -22,5 +22,6 @@ class MeetingBase(SchemaBase):
 class SNewMeeting(MeetingBase): ...
 
 
+@partial_model(required_fields=["id"])
 class SUpdateMeeting(MeetingBase):
     id: int = Field(..., description="ID of department to update")

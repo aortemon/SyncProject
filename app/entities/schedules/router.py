@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
+from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.schedules.dao import SchedulesDAO
 from app.entities.schedules.schemas import SNewSchedule, SUpdateSchedule
@@ -19,16 +20,12 @@ async def get_schedule_by_id(
 ):
     result = await SchedulesDAO.find_one_or_none_by_id(id)
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"ID = {id} not found",
-        )
+        raise NotFoundError(field="id", value=id)
     return result
 
 
 @router.post("/add/")
 async def add_schedule(
-    response: Response,
     new_item: SNewSchedule,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
@@ -38,14 +35,15 @@ async def add_schedule(
 
 @router.put("/update/")
 async def update_schedule(
-    response: Response,
     update: SUpdateSchedule,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    result = await SchedulesDAO.update(filter_by={"id": update.id}, **update.dict())
+    upd_dict = update.model_dump(exclude_none=True)
+    id = upd_dict["id"]
+    result = await SchedulesDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Schedule was not updated. ID={update.id} not found",
+            detail=f"Schedule was not updated. ID={id} not found",
         )
-    return {"message": f"Schedule(id={update.id}) was updated successfully"}
+    return {"message": f"Schedule(id={id}) was updated successfully"}
