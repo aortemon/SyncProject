@@ -1,11 +1,6 @@
-import json
-from datetime import date
-from typing import Annotated
+from pydantic import Field
 
-from fastapi import Form, HTTPException
-from pydantic import AfterValidator, Field, FutureDate, ValidationError, model_validator
-
-from app.entities.common.schema import SchemaBase, Validate, as_form, partial_model
+from app.entities.common.schema import SchemaBase
 
 
 class TaskCommentBase(SchemaBase):
