@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.entities.employees.models import Employee
     from app.entities.projects.models import Project
     from app.entities.statuses.models import Status
+    from app.entities.taskcomments.models import TaskComment
     from app.entities.taskfiles.models import TaskFile
 
 
@@ -34,4 +35,11 @@ class Task(Base):
 
     task_files: Mapped[List["TaskFile"]] = relationship(
         "TaskFile", back_populates="task", lazy="selectin", cascade="all, delete-orphan"
+    )
+
+    task_comments: Mapped[List["TaskComment"]] = relationship(
+        "TaskComment",
+        back_populates="task",
+        lazy="selectin",
+        cascade="all, delete-orphan",
     )

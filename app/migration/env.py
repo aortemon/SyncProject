@@ -22,6 +22,7 @@ from app.entities.releases.models import Release
 from app.entities.roles.models import Role
 from app.entities.schedules.models import Schedule
 from app.entities.statuses.models import Status
+from app.entities.taskcomments.models import TaskComment
 from app.entities.taskfiles.models import TaskFile
 from app.entities.tasks.models import Task
 from app.entities.vacations.models import Vacation

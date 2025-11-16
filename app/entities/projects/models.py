@@ -19,4 +19,3 @@ class Project(Base):
     manager: Mapped["Employee"] = relationship("Employee")
     status: Mapped["Status"] = relationship("Status")
     release: Mapped["Release"] = relationship("Release")
-    release: Mapped["Release"] = relationship("Release")
