@@ -20,7 +20,7 @@ class EmployeeMeeting(Base):
     )
 
     meeting: Mapped["Meeting"] = relationship(
-        "Meeting", back_populates="employee_meetings"
+        "Meeting", back_populates="employee_meetings", lazy="selectin"
     )
 
     employee: Mapped["Employee"] = relationship(
