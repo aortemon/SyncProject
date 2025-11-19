@@ -83,7 +83,6 @@ async def get_calendar_date(user_id: int, day: date) -> SCalendarDate:
             detail="User set in token not found",
         )
     ddf = datetime.strptime("2025-11-10", "%Y-%m-%d").date()
-    print(ddf, user_data.employee_meetings[0].meeting.date.date())
     meetings = [
         x.meeting for x in user_data.employee_meetings if x.meeting.date.date() == day
     ]

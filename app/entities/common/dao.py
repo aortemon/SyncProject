@@ -126,7 +126,6 @@ class BaseDAO:
 
     @classmethod
     async def update_with_outer_session(cls, session, filter_by, **values):
-        print(filter_by, values)
         return await cls._update_impl(session, filter_by, **values)
 
     # ========== DELETE ==========

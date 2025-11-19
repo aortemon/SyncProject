@@ -61,7 +61,6 @@ async def add_task(
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
     files: Optional[List[UploadFile]] = File(None),
 ):
-    print(new_item.model_dump())
     async with async_session_maker() as session:
         async with session.begin():
             new_item_dict = {**new_item.model_dump(), "creator_id": user_data.id}
