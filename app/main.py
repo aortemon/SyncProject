@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.entities.admin.router import router as router_admin
 from app.entities.auth.router import router as router_auth
 from app.entities.departments.router import router as router_departments
 from app.entities.employees.router import router as router_employees
@@ -87,6 +88,7 @@ def notfound():
 
 
 app.include_router(router_auth)
+app.include_router(router_admin)
 app.include_router(router_employees)
 app.include_router(router_statuses)
 app.include_router(router_workhours)

@@ -148,3 +148,5 @@ class BaseDAO:
                     await session.rollback()
                     raise e
                 return getattr(result, "rowcount", -1)
+            
+    
