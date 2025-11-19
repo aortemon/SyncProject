@@ -130,7 +130,7 @@ async def get_calendar_date(user_id: int, day: date) -> SCalendarDate:
             ]
         ),
         active_tasks=[(x.name, f"/get_task_by_id/{x.id}") for x in tasks],
-    )  # type: ignore
+    )
 
     return response
 
