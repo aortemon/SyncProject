@@ -82,7 +82,6 @@ async def get_calendar_date(user_id: int, day: date) -> SCalendarDate:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User set in token not found",
         )
-    ddf = datetime.strptime("2025-11-10", "%Y-%m-%d").date()
     meetings = [
         x.meeting for x in user_data.employee_meetings if x.meeting.date.date() == day
     ]
