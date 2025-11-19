@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Response
+from fastapi.responses import RedirectResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.auth import (
@@ -71,4 +72,4 @@ async def get_me(user_data: Employee = Depends(require_access(ANY_USER))):
 @router.post("/logout/")
 async def logout_user(response: Response):
     response.delete_cookie(key="user_access_token")
-    return {"message": "Пользователь успешно вышел из системы"}
+    return {"message": "Logged out successfully"}

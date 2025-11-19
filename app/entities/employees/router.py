@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.entities.auth.auth import get_password_hash
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
-from app.entities.common.exc import InvalidRequest, NotFoundError
+from app.entities.common.exc import NotFoundError
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
@@ -29,7 +29,7 @@ async def get_user_by_id(
 
 
 @router.put("/update/")
-async def update_project(
+async def update_employee(
     update: SUpdateEmployee,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):

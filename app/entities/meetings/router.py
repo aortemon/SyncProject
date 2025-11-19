@@ -35,6 +35,7 @@ async def add_meeting(
     async with async_session_maker() as session:
         async with session.begin():
             meeting_data = new_meeting.model_dump()
+            meeting_data['creator_id'] = user_data.id
             employees = meeting_data.pop("employees")
             meeting_result = await MeetingsDAO.add_with_outer_session(
                 session, **meeting_data
@@ -77,7 +78,7 @@ async def update_meeting(
                     )
                     if not res:
                         raise HTTPException(
-                            status_code=500, detail="Somnething went wrong"
+                            status_code=500, detail="Something went wrong"
                         )
         try:
             await session.commit()
