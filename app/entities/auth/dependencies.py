@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import List
 
-from app.config import get_auth_data
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from jose import JWTError, jwt
 
+from app.config import get_auth_data
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
 
@@ -19,8 +19,8 @@ class UserRole(str, Enum):
 ANY_USER = [UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR]
 
 
-def get_token(request: Request):
-    token = request.cookies.get("user_access_token")
+def get_token(request: Request, SyncAuthToken=Header(...)):
+    token = SyncAuthToken
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Auth-token not found"
