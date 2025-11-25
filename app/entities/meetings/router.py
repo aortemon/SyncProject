@@ -35,7 +35,7 @@ async def add_meeting(
     async with async_session_maker() as session:
         async with session.begin():
             meeting_data = new_meeting.model_dump()
-            meeting_data['creator_id'] = user_data.id
+            meeting_data["creator_id"] = user_data.id
             employees = meeting_data.pop("employees")
             meeting_result = await MeetingsDAO.add_with_outer_session(
                 session, **meeting_data

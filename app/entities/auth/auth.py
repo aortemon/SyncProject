@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
-from app.config import get_auth_data
 from jose import jwt
 from passlib.context import CryptContext
 from pydantic import EmailStr
 
+from app.config import get_auth_data
 from app.entities.employees.dao import EmployeesDAO
 
 

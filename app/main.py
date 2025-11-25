@@ -2,6 +2,7 @@ import logging
 
 from asyncpg import ForeignKeyViolationError, UniqueViolationError
 from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -23,6 +24,14 @@ from app.entities.workhours.router import router as router_workhours
 
 logger = logging.getLogger(__name__)
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -79,12 +88,40 @@ async def integrity_error_handler(request: Request, exc: IntegrityError):
 
 @app.get("/")
 def homepage():
-    return {"message": "<h1>Приветики</h1>"}
+    return {"message": "OK"}
 
 
 @app.get("/notfound")
 def notfound():
-    return {"message": "Not Found here"}
+    return {"message": "Not Found"}
+
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    return JSONResponse(
+        status_code=200,
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        },
+    )
+
+
+@app.api_route("/{anypath:path}", methods=["OPTIONS"])
+async def options_hander():
+    return JSONResponse(
+        status_code=200,
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        },
+    )
 
 
 app.include_router(router_auth)

@@ -78,4 +78,3 @@ def require_access(required_access_level: List[UserRole]):
         return await check_user_permission(current_user, required_access_level)
 
     return dependency
-    return dependency
