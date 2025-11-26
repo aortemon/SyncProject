@@ -16,7 +16,7 @@ class EmployeeDepartment(Base):
     office: Mapped[str256]
 
     department: Mapped["Department"] = relationship(
-        "Department", back_populates="employee_departments"
+        "Department", back_populates="employee_departments", lazy="selectin"
     )
     employee: Mapped["Employee"] = relationship(
         "Employee", back_populates="employee_departments"

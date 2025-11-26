@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING, List
+
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.entities.statuses.models import Status
 from database.model import Base, int_pk, str256
+
+if TYPE_CHECKING:
+    from app.entities.projects.models import Project
 
 
 class Release(Base):
@@ -12,5 +17,7 @@ class Release(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     status_id: Mapped[int] = mapped_column(ForeignKey("statuses.id"), nullable=False)
 
-    status: Mapped["Status"] = relationship("Status")
-    status: Mapped["Status"] = relationship("Status")
+    status: Mapped["Status"] = relationship("Status", lazy="selectin")
+    projects: Mapped[List["Project"]] = relationship(
+        "Project", back_populates="release", lazy="selectin"
+    )
