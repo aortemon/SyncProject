@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.entities.employees.models import Employee
     from app.entities.projects.models import Project
     from app.entities.statuses.models import Status
+    from app.entities.taskcomments.models import TaskComment
     from app.entities.taskfiles.models import TaskFile
 
 
@@ -25,13 +26,26 @@ class Task(Base):
     status_id: Mapped[int] = mapped_column(ForeignKey("statuses.id"), nullable=False)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
 
-    creator: Mapped["Employee"] = relationship("Employee", foreign_keys=[creator_id])
-    executor: Mapped["Employee"] = relationship("Employee", foreign_keys=[executor_id])
-    status: Mapped["Status"] = relationship("Status")
-    project: Mapped["Project"] = relationship("Project")
-    status: Mapped["Status"] = relationship("Status")
-    project: Mapped["Project"] = relationship("Project")
+    creator: Mapped["Employee"] = relationship(
+        "Employee", foreign_keys=[creator_id], lazy="selectin"
+    )
+    executor: Mapped["Employee"] = relationship(
+        "Employee", foreign_keys=[executor_id], lazy="selectin"
+    )
+    status: Mapped["Status"] = relationship("Status", lazy="selectin")
+    project: Mapped["Project"] = relationship(
+        "Project", back_populates="tasks", lazy="selectin"
+    )
+    status: Mapped["Status"] = relationship("Status", lazy="selectin")
+    project: Mapped["Project"] = relationship("Project", lazy="selectin")
 
     task_files: Mapped[List["TaskFile"]] = relationship(
         "TaskFile", back_populates="task", lazy="selectin", cascade="all, delete-orphan"
+    )
+
+    task_comments: Mapped[List["TaskComment"]] = relationship(
+        "TaskComment",
+        back_populates="task",
+        lazy="selectin",
+        cascade="all, delete-orphan",
     )

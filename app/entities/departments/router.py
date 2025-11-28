@@ -29,7 +29,7 @@ async def add_department(
     new_department: SNewDepartment,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    await DepartmentsDAO.add(**new_department.dict())
+    await DepartmentsDAO.add(**new_department.model_dump())
     return {"message": "New department was added successfully!"}
 
 

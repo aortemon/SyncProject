@@ -22,7 +22,6 @@ async def get_file_by_id(
         raise NotFoundError(field="id", value=id)
 
     src = Path.home() / "SyncProject" / "user_files" / result.source[1:]
-    print(src)
     with open(src, "rb") as file:
         buf = BytesIO(file.read())
 

@@ -2,12 +2,16 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import List
 
-from app.config import get_auth_data
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
+from app.config import get_auth_data
+from app.entities.common.exc import UnauthorizedError
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/")
 
 
 class UserRole(str, Enum):
@@ -19,16 +23,8 @@ class UserRole(str, Enum):
 ANY_USER = [UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR]
 
 
-def get_token(request: Request):
-    token = request.cookies.get("user_access_token")
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Auth-token not found"
-        )
-    return token
-
-
-async def get_current_user(token: str = Depends(get_token)):
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    print(token)
     try:
         auth_data = get_auth_data()
         # payload is dict containing sub - id of user
@@ -37,9 +33,8 @@ async def get_current_user(token: str = Depends(get_token)):
             token, auth_data["secret_key"], algorithms=[auth_data["algorithm"]]
         )
     except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token not found"
-        )
+        raise UnauthorizedError()
+
     expire = payload.get("exp")
     expire_time = datetime.fromtimestamp(int(expire), tz=timezone.utc)  # type: ignore
     if (not expire) or (expire_time < datetime.now(timezone.utc)):
@@ -77,5 +72,4 @@ def require_access(required_access_level: List[UserRole]):
     async def dependency(current_user: Employee = Depends(get_current_user)):
         return await check_user_permission(current_user, required_access_level)
 
-    return dependency
     return dependency

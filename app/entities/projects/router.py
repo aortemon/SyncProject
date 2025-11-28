@@ -29,7 +29,9 @@ async def add_project(
     new_item: SNewProject,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-    await ProjectDAO.add(**new_item.dict())
+    project_dict = new_item.model_dump()
+    project_dict["manager_id"] = user_data.id
+    await ProjectDAO.add(**project_dict)
     return {"message": "New project was added successfully!"}
 
 

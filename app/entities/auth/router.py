@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, Response
+from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.auth import (
@@ -7,7 +9,8 @@ from app.entities.auth.auth import (
     get_password_hash,
 )
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
-from app.entities.auth.schemas import SEmployeeRegister, SUserAuth
+from app.entities.auth.models import Token
+from app.entities.auth.schemas import SEmployeeRegister
 from app.entities.common.exc import DuplicateError, UnauthorizedError
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
@@ -53,14 +56,17 @@ async def register_user(
     return {"message": "Вы успешно зарегистрированы"}
 
 
-@router.post("/login/")
-async def auth_user(response: Response, user_data: SUserAuth):
-    check = await authenticate_user(email=user_data.email, password=user_data.password)
-    if check is None:
+@router.post("/login/", response_model=Token)
+async def auth_user(user_data: OAuth2PasswordRequestForm = Depends()):
+
+    user = await authenticate_user(
+        email=user_data.username, password=user_data.password
+    )
+    if user is None:
         raise UnauthorizedError()
-    access_token = create_access_token({"sub": str(check.id)})
-    response.set_cookie(key="user_access_token", value=access_token, httponly=True)
-    return {"access_token": access_token, "refresh_token": None}
+    access_token = create_access_token({"sub": str(user.id)})
+
+    return {"access_token": access_token, "token_type": "Bearer"}
 
 
 @router.get("/me/")
@@ -71,4 +77,20 @@ async def get_me(user_data: Employee = Depends(require_access(ANY_USER))):
 @router.post("/logout/")
 async def logout_user(response: Response):
     response.delete_cookie(key="user_access_token")
-    return {"message": "Пользователь успешно вышел из системы"}
+    return {"message": "Logged out successfully"}
+
+
+@router.get("/is_token_correct/")
+async def check_is_token_correct(
+    user_data: Employee = Depends(require_access(ANY_USER)),
+):
+    return JSONResponse(
+        status_code=200,
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "85.143.13.238:0",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        },
+    )

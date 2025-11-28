@@ -10,6 +10,8 @@ from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.files.dao import FilesDAO
 from app.entities.files.schemas import SNewFile
+from app.entities.taskcomments.dao import TaskCommentDAO
+from app.entities.taskcomments.schemas import SAddComment
 from app.entities.taskfiles.dao import TaskFilesDAO
 from app.entities.tasks.dao import TasksDAO
 from app.entities.tasks.schemas import SNewTask, SUpdateTask
@@ -59,7 +61,6 @@ async def add_task(
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
     files: Optional[List[UploadFile]] = File(None),
 ):
-
     async with async_session_maker() as session:
         async with session.begin():
             new_item_dict = {**new_item.model_dump(), "creator_id": user_data.id}
@@ -111,3 +112,14 @@ async def update_task(
     if result == 0:
         raise NotFoundError(field="id", value=id)
     return {"message": f"Task(id={id}) was updated successfully"}
+
+
+@router.post("/comments/add/")
+async def comment_task(
+    comment: SAddComment,
+    user_data: Employee = Depends(require_access(ANY_USER)),
+):
+    add_dict = comment.model_dump()
+    add_dict["author_id"] = user_data.id
+    await TaskCommentDAO.add(**add_dict)
+    return {"message": "Comment added successfully"}

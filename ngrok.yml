@@ -1,0 +1,6 @@
+authtoken: 35Wd84EosbnG2f1TY0bVkdUBG4F_4tva3EqVr6LQJYKoZmS5a
+tunnels:
+  myapp:
+    proto: http
+    addr: 8000
+    host_header: "localhost:8000"

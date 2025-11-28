@@ -1,5 +1,5 @@
-from datetime import date, timedelta
-from typing import List
+from datetime import date, time, timedelta
+from typing import List, Tuple
 
 from pydantic import EmailStr, Field, PastDate, field_validator
 
@@ -62,3 +62,43 @@ class EmployeeBase(SchemaBase):
 @partial_model(required_fields=["id"])
 class SUpdateEmployee(EmployeeBase):
     id: int = Field(..., description="ID of project to update")
+
+
+class SCalendarDate(SchemaBase):
+    day: date = Field(...)
+    is_vacation: bool = Field(
+        ..., description="True, if employee is in a vacation", examples=[False, True]
+    )
+    is_weekend: bool = Field(
+        ..., description="True if employee is in the weekend", examples=[False, True]
+    )
+    task_deadlines: List[Tuple[str, str]] = Field(
+        ...,
+        description="List of tuples contain name of task and links to it",
+        examples=[
+            [
+                ("Add validators to admin schemas", "/get_task_by_id/228"),
+                ("Fix db Integrity Error on do_backup() call", "/get_task_by_id/578"),
+            ]
+        ],
+    )
+    timesheet: List[Tuple[time, str, str | None]] = Field(
+        ...,
+        description="List of tuples sorted by time containing triplets of time, activity and, optionally, link to activity",
+        examples=[
+            [
+                ("08:00", "Start of the workday", ""),
+                ("15:30", 'Meeting "Yellow Boletus in USA"', "/get_meeting_by_id/1488"),
+            ]
+        ],
+    )
+    active_tasks: List[Tuple[str, str]] = Field(
+        ...,
+        description="List of tuples comtaining pairs of task and link to it",
+        examples=[
+            [
+                ("Fix pupku and zalupku", "/get_task_by_id/8064523"),
+                ("Upload trans furry porn to source.unn.ru", "/get_task_by_id/2561024"),
+            ]
+        ],
+    )

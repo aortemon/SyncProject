@@ -5,3 +5,4 @@ login.info
 *.env
 user_files/*
 todo.txt
+backups/*

@@ -29,3 +29,8 @@ async def update_vacation(
     if result == 0:
         raise NotFoundError(field="id", value=id)
     return {"message": f"Vacation(id={id}) was updated successfully"}
+
+
+@router.delete("/delete_past/")
+async def delete_old(user_data: Employee = Depends(require_access([UserRole.ADMIN]))):
+    await VacationsDAO.delete_past()

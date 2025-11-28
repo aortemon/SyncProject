@@ -11,7 +11,6 @@ class MeetingBase(SchemaBase):
         ..., description="Meeting name/theme", min_length=3, max_length=30
     )
     description: str = Field(..., description="Meeting extra info", max_length=500)
-    creator_id: int = Field(..., description="Creator ID")
     date: datetime = Field(
         ..., description="Date and time of meeting", examples=["2026-01-12 14:30:00"]
     )

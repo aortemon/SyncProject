@@ -27,7 +27,6 @@ class SNewFile(FileBase):
     @computed_field
     @property
     def hashname(self) -> str:
-        print(self._server_filename)
         return self._server_filename
 
     @computed_field
