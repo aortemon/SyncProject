@@ -110,9 +110,11 @@ class Validate:
         max_delta=timedelta(days=356),
         msg_on_error="dates are incorrect",
     ):
-        if min_delta <= date_after - date_before <= max_delta:
-            return cls_proxy
-        raise ValueError(msg_on_error)
+        if date_before and date_after:
+            if min_delta <= date_after - date_before <= max_delta:
+                return cls_proxy
+            raise ValueError(msg_on_error)
+        return cls_proxy
 
 
 def as_form(cls):

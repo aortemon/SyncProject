@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi import APIRouter, Depends, Response
+from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.entities.auth.auth import (
@@ -8,7 +9,8 @@ from app.entities.auth.auth import (
     get_password_hash,
 )
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
-from app.entities.auth.schemas import SEmployeeRegister, SUserAuth
+from app.entities.auth.models import Token
+from app.entities.auth.schemas import SEmployeeRegister
 from app.entities.common.exc import DuplicateError, UnauthorizedError
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
@@ -54,22 +56,17 @@ async def register_user(
     return {"message": "Вы успешно зарегистрированы"}
 
 
-@router.post("/login/")
-async def auth_user(response: Response, user_data: SUserAuth):
+@router.post("/login/", response_model=Token)
+async def auth_user(user_data: OAuth2PasswordRequestForm = Depends()):
 
-    check = await authenticate_user(email=user_data.email, password=user_data.password)
-    if check is None:
-        raise UnauthorizedError()
-    access_token = create_access_token({"sub": str(check.id)})
-    response.set_cookie(
-        key="user_access_token",
-        value=access_token,
-        secure=True,
-        samesite=None,
-        httponly=False,
-        expires=7200,
+    user = await authenticate_user(
+        email=user_data.username, password=user_data.password
     )
-    return {"access_token": access_token}
+    if user is None:
+        raise UnauthorizedError()
+    access_token = create_access_token({"sub": str(user.id)})
+
+    return {"access_token": access_token, "token_type": "Bearer"}
 
 
 @router.get("/me/")

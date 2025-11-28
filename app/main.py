@@ -23,6 +23,7 @@ from app.entities.vacations.router import router as router_vacations
 from app.entities.workhours.router import router as router_workhours
 
 logger = logging.getLogger(__name__)
+
 app = FastAPI()
 
 app.add_middleware(
