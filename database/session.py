@@ -9,17 +9,17 @@ from app.entities.employeemeetings.models import EmployeeMeeting
 from app.entities.employees.models import Employee
 from app.entities.files.models import File
 from app.entities.meetings.models import Meeting
+from app.entities.notifications.models import Notification
 from app.entities.projects.models import Project
 from app.entities.releases.models import Release
 from app.entities.roles.models import Role
 from app.entities.schedules.models import Schedule
 from app.entities.statuses.models import Status
+from app.entities.taskcomments.models import TaskComment
 from app.entities.taskfiles.models import TaskFile
 from app.entities.tasks.models import Task
 from app.entities.vacations.models import Vacation
 from app.entities.workhours.models import WorkHour
-from app.entities.notifications.models import Notification
-from app.entities.taskcomments.models import TaskComment
 
 DATABASE_URL = get_db_url()
 
@@ -29,3 +29,7 @@ engine = create_async_engine(DATABASE_URL)
 
 # Creates async sessions Fabric for created engine
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
+
+class Sessioner:
+    session_maker = async_session_maker

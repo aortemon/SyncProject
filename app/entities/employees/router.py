@@ -1,18 +1,19 @@
 # pyright: reportAttributeAccessIssue=false
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.entities.auth.auth import get_password_hash
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
-from app.entities.common.exc import NotFoundError
+from app.entities.common.exc import InvalidRequest, NotFoundError
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
 from app.entities.employees.schemas import SCalendarDate, SUpdateEmployee
 from app.entities.tasks.dao import TasksDAO
-from database.session import async_session_maker
+from database.session import Sessioner
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
@@ -38,7 +39,7 @@ async def update_employee(
     update: SUpdateEmployee,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    async with async_session_maker() as session:
+    async with Sessioner.session_maker() as session:
         async with session.begin():
             upd_dict = update.model_dump(exclude_none=True)
             id = upd_dict["id"]
@@ -71,10 +72,10 @@ async def update_employee(
             except Exception as e:
                 await session.rollback()
                 raise e
-    return {"message": f"Project(id={id}) was updated successfully"}
+    return {"msg": f"Project(id={id}) was updated successfully"}
 
 
-async def get_calendar_date(user_id: int, day: date) -> SCalendarDate:
+async def __get_calendar_date(user_id: int, day: date) -> SCalendarDate:
     weekdays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
     user_data = await EmployeesDAO.find_one_or_none_by_id(data_id=user_id)
     if not user_data:
@@ -101,10 +102,10 @@ async def get_calendar_date(user_id: int, day: date) -> SCalendarDate:
         ],
         timesheet=sorted(
             [
-                (workhours.starttime.strftime("%H:%M"), "Начало рабочего дня", ""),
-                (workhours.endtime.strftime("%H:%M"), "Конец рабочего дня", ""),
-                (workhours.lunchbreak_start.strftime("%H:%M"), "Начало обеда", ""),
-                (workhours.lunchbreak_end.strftime("%H:%M"), "Конец обеда", ""),
+                # (workhours.starttime.strftime("%H:%M"), "Начало рабочего дня", ""),
+                # (workhours.endtime.strftime("%H:%M"), "Конец рабочего дня", ""),
+                # (workhours.lunchbreak_start.strftime("%H:%M"), "Начало обеда", ""),
+                # (workhours.lunchbreak_end.strftime("%H:%M"), "Конец обеда", ""),
                 *[
                     (x.date.strftime("%H:%M"), f"Собрание {x.name}", "")
                     for x in meetings
@@ -135,29 +136,74 @@ async def get_calendar_date(user_id: int, day: date) -> SCalendarDate:
     return response
 
 
+async def __get_calendar_range(
+    id: int,
+    start_date: date,
+    end_date: date,
+) -> List[SCalendarDate]:
+    if (end_date - start_date).days > 32:
+        raise InvalidRequest(
+            detail=f"Too large range: end_date - start_date distance is {(end_date - start_date).days} which is greater than 32."
+        )
+
+    def date_range(start_date, end_date):
+        current_date = start_date
+        while current_date <= end_date:
+            yield current_date
+            current_date += timedelta(days=1)
+
+    schedule = []
+
+    for cur_date in date_range(start_date, end_date):
+        schedule.append(
+            await __get_calendar_date(id, cur_date),
+        )
+
+    return schedule
+
+
 @router.get("/calendar/mine/today/")
 async def get_my_schedule_for_today(
     user_data: Employee = Depends(require_access(ANY_USER)),
 ) -> SCalendarDate:
-    return await get_calendar_date(user_data.id, datetime.today().date())
+    return await __get_calendar_date(user_data.id, datetime.today().date())
 
 
 @router.get("/calendar/mine/")
 async def get_my_schedule_exact_day(
     date: date, user_data: Employee = Depends(require_access(ANY_USER))
 ) -> SCalendarDate:
-    return await get_calendar_date(user_data.id, date)
+    return await __get_calendar_date(user_data.id, date)
 
 
-@router.get("/calendar/get_todays_by_user_id")
+@router.get("/calendar/mine/range/")
+async def get_my_schedule_for_range(
+    start_date: date,
+    end_date: date,
+    user_data: Employee = Depends(require_access(ANY_USER)),
+) -> List[SCalendarDate]:
+    return await __get_calendar_range(user_data.id, start_date, end_date)
+
+
+@router.get("/calendar/get_todays_by_user_id/")
 async def get_someones_schedule_for_today(
     id: int, user_data: Employee = Depends(require_access(ANY_USER))
 ) -> SCalendarDate:
-    return await get_calendar_date(id, datetime.today().date())
+    return await __get_calendar_date(id, datetime.today().date())
 
 
-@router.get("/calendar/get_by_user_id_and_date")
+@router.get("/calendar/get_by_user_id_and_date/")
 async def get_someones_schedule_by_id_and_date(
     id: int, date: date, user_data: Employee = Depends(require_access(ANY_USER))
 ) -> SCalendarDate:
-    return await get_calendar_date(id, date)
+    return await __get_calendar_date(id, date)
+
+
+@router.get("/calendar/get_range_by_user_id/")
+async def get_someones_schedule_for_range(
+    id: int,
+    start_date: date,
+    end_date: date,
+    user_data: Employee = Depends(require_access(ANY_USER)),
+) -> List[SCalendarDate]:
+    return await __get_calendar_range(id, start_date, end_date)

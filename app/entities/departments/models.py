@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, load_only, relationship
 
 from database.model import Base, empls_fk, int_pk, str256
 
@@ -14,8 +14,8 @@ class Department(Base):
     name: Mapped[str256]
     lead_id: Mapped[empls_fk]
 
-    employee_departments: Mapped[List["EmployeeDepartment"]] = relationship(
-        "EmployeeDepartment", back_populates="department"
+    staff: Mapped[List["EmployeeDepartment"]] = relationship(
+        "EmployeeDepartment", back_populates="department", lazy="selectin"
     )
 
-    lead: Mapped["Employee"] = relationship("Employee", lazy="selectin")
+    lead: Mapped["Employee"] = relationship("Employee")

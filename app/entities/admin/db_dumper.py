@@ -12,11 +12,18 @@ logger = logging.getLogger(__name__)
 
 class DatabaseUtils:
 
-    @staticmethod
-    def do_backup(compress=True, include_data=True):
+    backups_dir: Path = Path.home() / "SyncProject" / "backups"
+    db_name: str = settings.DB_NAME
+
+    @classmethod
+    def setup_test(cls):
+        cls.backups_dir = Path.home() / "SyncProject" / "tests" / "backups"
+        cls.db_name = settings.TEST_DB_NAME
+
+    @classmethod
+    def do_backup(cls, compress=True, include_data=True):
         timestamp = datetime.now().strftime(r"%Y%m%d_%H%M%S")
         filename = f"backup_sync_db_{timestamp}"
-        path = Path.home() / "SyncProject" / "backups"
         try:
             cmd = [
                 "pg_dump",
@@ -27,7 +34,7 @@ class DatabaseUtils:
                 "-U",
                 settings.DB_USER,
                 "-d",
-                settings.DB_NAME,
+                cls.db_name,
                 "-v",
             ]
 
@@ -37,7 +44,7 @@ class DatabaseUtils:
             env = os.environ.copy()
 
             if compress:
-                dst = path / f"{filename}.sql.gz"
+                dst = cls.backups_dir / f"{filename}.sql.gz"
                 process1 = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env)
                 with open(dst, "wb") as f:
                     process2 = subprocess.Popen(
@@ -46,7 +53,7 @@ class DatabaseUtils:
                     process1.stdout.close()  # type: ignore
                     process2.communicate()
             else:
-                dst = path / f"{filename}.sql"
+                dst = cls.backups_dir / f"{filename}.sql"
                 with open(dst, "w") as f:
                     subprocess.run(cmd, stdout=f, env=env, check=True)
 

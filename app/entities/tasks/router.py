@@ -3,8 +3,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
+from app._logger import logger
 from app.entities.auth.dependencies import ANY_USER, UserRole, require_access
 from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
@@ -15,7 +17,7 @@ from app.entities.taskcomments.schemas import SAddComment
 from app.entities.taskfiles.dao import TaskFilesDAO
 from app.entities.tasks.dao import TasksDAO
 from app.entities.tasks.schemas import SNewTask, SUpdateTask
-from database.session import async_session_maker
+from database.session import Sessioner
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -61,7 +63,7 @@ async def add_task(
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
     files: Optional[List[UploadFile]] = File(None),
 ):
-    async with async_session_maker() as session:
+    async with Sessioner.session_maker() as session:
         async with session.begin():
             new_item_dict = {**new_item.model_dump(), "creator_id": user_data.id}
             task_insert_result = await TasksDAO.add(**new_item_dict)
@@ -85,6 +87,7 @@ async def add_task(
                         / "user_files"
                         / file_data.source[1:]
                     )
+                    logger.info(f"Added file: {file_data.source[1:]}")
                     with open(dst, "wb") as buffer:
                         shutil.copyfileobj(file.file, buffer)
 
@@ -98,20 +101,56 @@ async def add_task(
             except SQLAlchemyError as e:
                 await session.rollback()
                 raise e
-    return {"message": "New task was added successfully!"}
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
 async def update_task(
     update: SUpdateTask,
-    user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
+    user_data: Employee = Depends(
+        require_access([UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR])
+    ),
 ):
     upd_dict = update.model_dump(exclude_none=True)
+    has_start_date = "start_date" in upd_dict
+    has_end_date = "end_date" in upd_dict
     id = upd_dict["id"]
+    if has_start_date ^ has_end_date:
+        previous = await TasksDAO.find_one_or_none_by_id(id)
+        if not previous:
+            raise NotFoundError(field="id", value=id)
+
+        if "start_date" not in upd_dict or not upd_dict["start_date"]:
+            upd_dict["start_date"] = previous.start_date
+        if "end_date" not in upd_dict or not upd_dict["end_date"]:
+            upd_dict["end_date"] = previous.end_date
+        new_schema = SUpdateTask(**upd_dict)
+        upd_dict = new_schema.model_dump(exclude_none=True)
+
+        if not has_start_date:
+            del upd_dict["start_date"]
+
+        if not has_end_date:
+            del upd_dict["end_date"]
+
     result = await TasksDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
-    return {"message": f"Task(id={id}) was updated successfully"}
+    return {"msg": f"Task(id={id}) was updated successfully"}
+
+
+@router.delete("/delete/")
+async def delete_task(
+    id: int,
+    user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
+):
+    task = await TasksDAO.find_one_or_none_by_id(data_id=id)
+    if not task:
+        raise NotFoundError(field="Task with id", value=id)
+    await TaskCommentDAO.delete(task_id=id)
+    await TaskFilesDAO.delete(task_id=id)
+    await TasksDAO.delete(id=id)
+    return {"msg": "Deleted successfully"}
 
 
 @router.post("/comments/add/")
@@ -122,4 +161,4 @@ async def comment_task(
     add_dict = comment.model_dump()
     add_dict["author_id"] = user_data.id
     await TaskCommentDAO.add(**add_dict)
-    return {"message": "Comment added successfully"}
+    return {"msg": "Comment added successfully"}

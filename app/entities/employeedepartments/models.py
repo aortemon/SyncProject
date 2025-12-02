@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, load_only, mapped_column, relationship
 
 from app.entities.departments.models import Department
 from app.entities.employees.models import Employee
@@ -16,10 +16,10 @@ class EmployeeDepartment(Base):
     office: Mapped[str256]
 
     department: Mapped["Department"] = relationship(
-        "Department", back_populates="employee_departments", lazy="selectin"
+        "Department", back_populates="staff"
     )
     employee: Mapped["Employee"] = relationship(
-        "Employee", back_populates="employee_departments"
+        "Employee", back_populates="employee_departments", lazy="selectin"
     )
 
     def __str__(self):

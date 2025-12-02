@@ -24,7 +24,6 @@ ANY_USER = [UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR]
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    print(token)
     try:
         auth_data = get_auth_data()
         # payload is dict containing sub - id of user

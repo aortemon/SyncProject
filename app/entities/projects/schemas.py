@@ -4,7 +4,7 @@ from app.entities.common.schema import SchemaBase, partial_model
 
 
 class ProjectBase(SchemaBase):
-    name: str = Field(..., description="Project name")
+    name: str = Field(..., description="Project name", min_length=3, max_length=30)
     description: str = Field(..., description="Project description")
     status_id: int = Field(..., description="Status ID")
     release_id: int = Field(..., description="Corresponding release ID")

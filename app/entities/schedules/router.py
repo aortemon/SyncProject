@@ -29,8 +29,8 @@ async def add_schedule(
     new_item: SNewSchedule,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
-    await SchedulesDAO.add(**new_item.dict())
-    return {"message": "New schedule was added successfully!"}
+    await SchedulesDAO.add(**new_item.model_dump())
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
@@ -46,4 +46,4 @@ async def update_schedule(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Schedule was not updated. ID={id} not found",
         )
-    return {"message": f"Schedule(id={id}) was updated successfully"}
+    return {"msg": f"Schedule(id={id}) was updated successfully"}

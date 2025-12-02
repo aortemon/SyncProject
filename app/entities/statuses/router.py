@@ -30,7 +30,7 @@ async def add_status(
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
     await StatusesDAO.add(**new_item.model_dump())
-    return {"message": f'New status "{new_item.alias}" successfully added!'}
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
@@ -43,6 +43,4 @@ async def update_status(
     result = await StatusesDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
-    return {
-        "message": f'Status(id={id}) is "{getattr(update, "alias", "Unknown")}" now'
-    }
+    return {"msg": f'Status(id={id}) is "{getattr(update, "alias", "Unknown")}" now'}

@@ -14,4 +14,4 @@ async def get_all_departments(
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
     result = DatabaseUtils.do_backup(compress=compress, include_data=include_data)
-    return {"message": f"OK. {result}"}
+    return {"msg": f"OK. {result}"}

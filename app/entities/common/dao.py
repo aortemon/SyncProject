@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeBase
 
-from database.session import async_session_maker
+from database.session import Sessioner
 
 # DAO is Data Access Object
 
@@ -21,7 +21,7 @@ R = TypeVar("R")
 def with_session_begin(func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(cls, *args, **kwargs):
-        async with async_session_maker() as session:
+        async with Sessioner.session_maker() as session:
             async with session.begin():
                 result = await func(cls, session, *args, **kwargs)
                 try:
@@ -37,7 +37,7 @@ def with_session_begin(func: Callable) -> Callable:
 def with_session(func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(cls, *args, **kwargs):
-        async with async_session_maker() as session:
+        async with Sessioner.session_maker() as session:
             return await func(cls, session, *args, **kwargs)
 
     return wrapper
@@ -137,7 +137,7 @@ class BaseDAO:
                 raise ValueError(
                     "Необходимо указать хотя бы один параметр для удаления."
                 )
-        async with async_session_maker() as session:
+        async with Sessioner.session_maker() as session:
             async with session.begin():
                 query = sqlalchemy_delete(cls.model).filter_by(**filter_by)
                 result = await session.execute(query)
@@ -147,5 +147,3 @@ class BaseDAO:
                     await session.rollback()
                     raise e
                 return getattr(result, "rowcount", -1)
-            
-    

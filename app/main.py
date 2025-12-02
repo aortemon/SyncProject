@@ -1,14 +1,10 @@
-import logging
-
-from asyncpg import ForeignKeyViolationError, UniqueViolationError
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.responses import JSONResponse
 
 from app.entities.admin.router import router as router_admin
 from app.entities.auth.router import router as router_auth
+from app.entities.common.exc import NotFoundError
 from app.entities.departments.router import router as router_departments
 from app.entities.employees.router import router as router_employees
 from app.entities.files.router import router as router_files
@@ -22,9 +18,11 @@ from app.entities.tasks.router import router as router_tasks
 from app.entities.vacations.router import router as router_vacations
 from app.entities.workhours.router import router as router_workhours
 
-logger = logging.getLogger(__name__)
+from .exc_handlers import exception_handlers
 
 app = FastAPI()
+
+app = exception_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,84 +33,13 @@ app.add_middleware(
 )
 
 
-@app.exception_handler(StarletteHTTPException)
-async def http_not_found_handler(request: Request, exc: StarletteHTTPException):
-    logging.error(f"Not found error: {exc}")
-    if exc.status_code == status.HTTP_404_NOT_FOUND:
-        return RedirectResponse(url="/notfound")
-    return exc
-
-
-@app.exception_handler(SQLAlchemyError)
-async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
-    logging.error(f"Database error: {exc}")
-    return JSONResponse(
-        status_code=500,
-        content={"detail": f"{exc}", "type": "db_er:sqlalchemy"},
-    )
-
-
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
-    logging.error(f"HTTP error: {exc}")
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": f"{str(exc)}", "type": "http_err"},
-    )
-
-
-@app.exception_handler(IntegrityError)
-async def integrity_error_handler(request: Request, exc: IntegrityError):
-    logging.error(f"Database error: {exc}")
-
-    orig_exc = exc.orig
-
-    if isinstance(orig_exc, UniqueViolationError):
-        return JSONResponse(
-            status_code=500,
-            content={"detail": "Resource already exists", "type": "db_err:duplicate"},
-        )
-    elif isinstance(orig_exc, ForeignKeyViolationError):
-        return JSONResponse(
-            status_code=500,
-            content={
-                "detail": "Referenced resource does not exist",
-                "type": "db_err:foreign_key",
-            },
-        )
-
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Data integrity error", "type": "db_err:integrity"},
-    )
-
-
 @app.get("/")
 def homepage():
-    return {"message": "OK"}
-
-
-@app.get("/notfound")
-def notfound():
-    return {"message": "Not Found"}
+    return {"msg": "OK"}
 
 
 @app.options("/{rest_of_path:path}")
 async def preflight_handler(rest_of_path: str):
-    return JSONResponse(
-        status_code=200,
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*",
-            "Access-Control-Allow-Credentials": "true",
-        },
-    )
-
-
-@app.api_route("/{anypath:path}", methods=["OPTIONS"])
-async def options_hander():
     return JSONResponse(
         status_code=200,
         content={},
@@ -141,3 +68,10 @@ app.include_router(router_files)
 app.include_router(router_vacations)
 app.include_router(router_meetings)
 app.include_router(router_notifications)
+app.include_router(router_meetings)
+app.include_router(router_notifications)
+
+
+@app.api_route("/{anypath:path}", methods=["GET", "POST", "PUT", "PATCH"])
+async def options_hander(anypath):
+    raise NotFoundError("path", f"/{anypath}")

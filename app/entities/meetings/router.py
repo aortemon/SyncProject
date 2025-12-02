@@ -7,7 +7,7 @@ from app.entities.employeemeetings.dao import EmployeeMeetingsDAO
 from app.entities.employees.models import Employee
 from app.entities.meetings.dao import MeetingsDAO
 from app.entities.meetings.schemas import SNewMeeting, SUpdateMeeting
-from database.session import async_session_maker
+from database.session import Sessioner
 
 router = APIRouter(prefix="/meetings", tags=["Meetings"])
 
@@ -32,7 +32,7 @@ async def add_meeting(
     new_meeting: SNewMeeting,
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):
-    async with async_session_maker() as session:
+    async with Sessioner.session_maker() as session:
         async with session.begin():
             meeting_data = new_meeting.model_dump()
             meeting_data["creator_id"] = user_data.id
@@ -51,7 +51,7 @@ async def add_meeting(
         except SQLAlchemyError as e:
             await session.rollback()
             raise e
-    return {"message": "New task was added successfully!"}
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
@@ -60,8 +60,14 @@ async def update_meeting(
     user_data: Employee = Depends(require_access(ANY_USER)),
 ):
     meeting_data = update.model_dump(exclude_none=True)
-    employees = meeting_data.pop("employees")
-    async with async_session_maker() as session:
+    employees = []
+    if "employees" in meeting_data:
+        employees = meeting_data.pop("employees")
+        print("??????? ", employees)
+        if not isinstance(employees, list):
+            raise HTTPException(status_code=422, detail="Something went wrong")
+
+    async with Sessioner.session_maker() as session:
         async with session.begin():
             meeting_result = await MeetingsDAO.update_with_outer_session(
                 session, filter_by={"id": meeting_data["id"]}, **meeting_data
@@ -78,11 +84,11 @@ async def update_meeting(
                     )
                     if not res:
                         raise HTTPException(
-                            status_code=500, detail="Something went wrong"
+                            status_code=422, detail="Something went wrong"
                         )
         try:
             await session.commit()
         except SQLAlchemyError as e:
             await session.rollback()
             raise e
-    return {"message": "New task was added successfully!"}
+    return {"msg": "Successfully added!"}
