@@ -13,7 +13,21 @@ class WorkhourBase(SchemaBase):
 
     @model_validator(mode="after")
     def validate(self):
-        if self.starttime < self.lunchbreak_start < self.lunchbreak_end < self.endtime:
+        if (
+            not all(
+                bool(x)
+                for x in [
+                    self.starttime,
+                    self.lunchbreak_start,
+                    self.lunchbreak_end,
+                    self.endtime,
+                ]
+            )
+            or self.starttime
+            < self.lunchbreak_start
+            < self.lunchbreak_end
+            < self.endtime
+        ):
             return self
         raise ValueError(
             "time fields are incorrect. Start times should " "come before end time."
@@ -24,7 +38,7 @@ class SNewWorkhour(WorkhourBase): ...
 
 
 @partial_model(required_fields=["id"])
-class SUpdateWorkhour(BaseModel):
+class SUpdateWorkhour(WorkhourBase):
     id: int = Field(
         ...,
         description="ID of workhour to update",

@@ -26,7 +26,7 @@ async def mark_as_read(
     if user_data.id != getattr(result, "reciever_id", -1):
         raise AccessDeniedError()
     await NotificationsDAO.update(filter_by={"id": id}, is_read=True)
-    return {"message": "Successfully marked as read!"}
+    return {"msg": "Successfully marked as read!"}
 
 
 @router.get("/get_by_id/")
@@ -45,7 +45,7 @@ async def add_notification(
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
     await NotificationsDAO.add(**new_notification.model_dump())
-    return {"message": "New department was added successfully!"}
+    return {"msg": "Successfully added!"}
 
 
 @router.delete("/remove/")
@@ -58,4 +58,4 @@ async def remove_notification(
     if user_data.id != getattr(result, "reciever_id", -1):
         raise AccessDeniedError()
     await NotificationsDAO.delete(id=id)
-    return {"message": "Successfully removed!"}
+    return {"msg": "Successfully removed!"}

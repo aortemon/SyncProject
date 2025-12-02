@@ -21,19 +21,10 @@ class TasksBase(SchemaBase):
     executor_id: int | None = None  # Field(..., description="Executor's ID")
     start_date: FutureOrNowDate = Field(..., description="Start date of task execution")
     end_date: FutureDate = Field(..., description="End date of task execution")
-    name: str = Field(..., description="Task name", min_length=3, max_length=30)
+    name: str = Field(..., description="Task name", min_length=3, max_length=100)
     description: str = Field(..., description="Task description")
     status_id: int = Field(..., description="Status ID")
     project_id: int = Field(..., description="Project ID")
-
-    @model_validator(mode="after")
-    def validate_start_end_dates(self):
-        return Validate.dates_range(
-            self,
-            self.start_date,
-            self.end_date,
-            msg_on_error="start_date should come before end_date.",
-        )
 
 
 @as_form
@@ -49,6 +40,14 @@ class SNewTask(TasksBase):
             raise HTTPException(400, f"Invalid task data: {e}")
 
 
-@partial_model(required_fields=["id"])
 class SUpdateTask(TasksBase):
     id: int = Field(..., description="ID of task to update")
+    executor_id: int | None = None  # Field(..., description="Executor's ID")
+    start_date: FutureOrNowDate | None = Field(
+        ..., description="Start date of task execution"
+    )
+    end_date: FutureDate | None = Field(..., description="End date of task execution")
+    name: str | None = Field(..., description="Task name", min_length=3, max_length=100)
+    description: str | None = Field(..., description="Task description")
+    status_id: int | None = Field(..., description="Status ID")
+    project_id: int | None = Field(..., description="Project ID")

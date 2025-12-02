@@ -29,8 +29,8 @@ async def add_release(
     new_item: SNewRelease,
     user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
 ):
-    await ReleasesDAO.add(**new_item.dict())
-    return {"message": "New release was added successfully!"}
+    await ReleasesDAO.add(**new_item.model_dump())
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
@@ -43,4 +43,4 @@ async def update_release(
     result = await ReleasesDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
-    return {"message": f"Release(id={id}) was updated successfully"}
+    return {"msg": f"Release(id={id}) was updated successfully"}

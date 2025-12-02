@@ -30,7 +30,7 @@ async def add_workhour(
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
     await WorkHoursDAO.add(**new_item.model_dump())
-    return {"message": "New workhour successfully added"}
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
@@ -43,4 +43,4 @@ async def update_workhour(
     result = await WorkHoursDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
-    return {"message": f"Workhour(id={id}) successfully updated"}
+    return {"msg": f"Workhour(id={id}) successfully updated"}

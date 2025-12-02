@@ -15,7 +15,7 @@ async def add_vacation(
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
 ):
     await VacationsDAO.add(**new_department.model_dump())
-    return {"message": "New vacation was added successfully!"}
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
@@ -28,7 +28,7 @@ async def update_vacation(
     result = await VacationsDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
-    return {"message": f"Vacation(id={id}) was updated successfully"}
+    return {"msg": f"Vacation(id={id}) was updated successfully"}
 
 
 @router.delete("/delete_past/")

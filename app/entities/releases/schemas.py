@@ -4,9 +4,9 @@ from app.entities.common.schema import SchemaBase, partial_model
 
 
 class ReleaseBase(SchemaBase):
-    name: str = Field(..., description="Release name")
+    name: str = Field(..., description="Release name", min_length=3, max_length=30)
     version: str = Field(..., description="Release version", min_length=3)
-    description: str = Field(..., description="Release description")
+    description: str = Field(..., description="Release description", max_length=512)
     status_id: int = Field(..., description="Status ID")
 
 

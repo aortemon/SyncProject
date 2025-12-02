@@ -15,12 +15,12 @@ from app.entities.common.exc import DuplicateError, UnauthorizedError
 from app.entities.employeedepartments.dao import EmployeeDepartmentsDAO
 from app.entities.employees.dao import EmployeesDAO
 from app.entities.employees.models import Employee
-from database.session import async_session_maker
+from database.session import Sessioner
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post("/register")
+@router.post("/register/")
 async def register_user(
     employee_data: SEmployeeRegister,
     user_data: Employee = Depends(require_access([UserRole.ADMIN])),
@@ -28,9 +28,9 @@ async def register_user(
     users = await EmployeesDAO.find_one_or_none(email=employee_data.email)
     if users:
         raise DuplicateError(field="id", value=users.id)
-    async with async_session_maker() as session:
+    async with Sessioner.session_maker() as session:
         async with session.begin():
-            user_dict = employee_data.dict()
+            user_dict = employee_data.model_dump()
             departments_list = user_dict.pop("departments")
             user_dict["password"] = get_password_hash(employee_data.password)
             new_user_instance = await EmployeesDAO.add_with_outer_session(
@@ -53,7 +53,7 @@ async def register_user(
             except SQLAlchemyError as e:
                 await session.rollback()
                 raise e
-    return {"message": "Вы успешно зарегистрированы"}
+    return {"msg": "Registered successfully"}
 
 
 @router.post("/login/", response_model=Token)
@@ -77,7 +77,7 @@ async def get_me(user_data: Employee = Depends(require_access(ANY_USER))):
 @router.post("/logout/")
 async def logout_user(response: Response):
     response.delete_cookie(key="user_access_token")
-    return {"message": "Logged out successfully"}
+    return {"msg": "Logged out successfully"}
 
 
 @router.get("/is_token_correct/")

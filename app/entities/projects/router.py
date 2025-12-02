@@ -32,7 +32,7 @@ async def add_project(
     project_dict = new_item.model_dump()
     project_dict["manager_id"] = user_data.id
     await ProjectDAO.add(**project_dict)
-    return {"message": "New project was added successfully!"}
+    return {"msg": "Successfully added!"}
 
 
 @router.put("/update/")
@@ -45,4 +45,4 @@ async def update_project(
     result = await ProjectDAO.update(filter_by={"id": id}, **upd_dict)
     if result == 0:
         raise NotFoundError(field="id", value=id)
-    return {"message": f"Project(id={id}) was updated successfully"}
+    return {"msg": f"Project(id={id}) was updated successfully"}
