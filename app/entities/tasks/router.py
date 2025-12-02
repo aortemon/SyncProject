@@ -139,6 +139,20 @@ async def update_task(
     return {"msg": f"Task(id={id}) was updated successfully"}
 
 
+@router.delete("/delete/")
+async def delete_task(
+    id: int,
+    user_data: Employee = Depends(require_access([UserRole.ADMIN, UserRole.MANAGER])),
+):
+    task = await TasksDAO.find_one_or_none_by_id(data_id=id)
+    if not task:
+        raise NotFoundError(field="Task with id", value=id)
+    await TaskCommentDAO.delete(task_id=id)
+    await TaskFilesDAO.delete(task_id=id)
+    await TasksDAO.delete(id=id)
+    return {"msg": "Deleted successfully"}
+
+
 @router.post("/comments/add/")
 async def comment_task(
     comment: SAddComment,
