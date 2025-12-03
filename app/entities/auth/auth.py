@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta, timezone
 
 from jose import jwt
@@ -38,4 +39,5 @@ async def authenticate_user(email: EmailStr, password: str):
         is False
     ):
         return None
+    return user
     return user

@@ -21,7 +21,6 @@ from database.session import Sessioner
 @pytest_asyncio.fixture(scope="module", autouse=True)
 async def set_test_database():
     DATABASE_URL = get_db_url(is_test=True)
-    print("DB_URL: ", DATABASE_URL)
     engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
 
     async with engine.begin() as conn:

@@ -57,7 +57,7 @@ class BaseTest:
 
     def __postconfig(self):
         if not hasattr(self, "no_existent_ids"):
-            self.no_existent_ids = list(range(100, 106))
+            self.no_existent_ids = list(range(10000, 10006))
         self.requester = DefaultRequester(self.route)
 
     @pytest.fixture(autouse=True)
@@ -89,10 +89,12 @@ class BaseTest:
         response = await async_client_as_admin.post(
             **self.requester.add(**self.add_values)
         )
-        assert response.status_code == 200, f"In {self.suite_name}"
+        assert (
+            response.status_code == 200
+        ), f"In {self.suite_name}In {self.suite_name} with response.json() = \n{response.json()}"
         assert response.json() == {
             "msg": "Successfully added!"
-        }, f"In {self.suite_name}"
+        }, f"In {self.suite_name} with response.json() = \n{response.json()}"
 
     async def test_update(self, async_client_as_admin: AsyncClient):
         response = await async_client_as_admin.put(

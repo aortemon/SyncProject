@@ -1,0 +1,67 @@
+name: Run Pytest
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  DB_HOST: localhost
+  DB_PORT: 5432
+  DB_NAME: sync_db
+  TEST_DB_NAME: test_sync_db
+  DB_USER: admin
+  DB_PASSWORD: 31415926535
+  SECRET_KEY: gV64m7aIzFG5qpgVphvQbPQrtAO0nM-7YwwOvu0XPt5KJOjAy4AfgLkqJXYEt
+  ALGORITHM: HS256
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install PostgreSQL
+        run: |
+          sudo apt update
+          sudo apt-get install -y postgresql-client
+
+      - name: Install Python dependecies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Set up PostgreSQL database
+        run: |
+          chmod +x scripts/*.sh 2>/dev/null || true
+          ./scripts/setup_db.sh
+          ./scripts/restore_db.sh
+
+      - name: Run tests
+        run: pytest --maxfail=5
+
+
+
