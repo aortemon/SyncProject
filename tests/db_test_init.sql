@@ -75,3 +75,4 @@ SELECT setval('releases_id_seq', COALESCE(MAX(id), 0) + 1, false) FROM releases;
 SELECT setval('projects_id_seq', COALESCE(MAX(id), 0) + 1, false) FROM projects;
 SELECT setval('meetings_id_seq', COALESCE(MAX(id), 0) + 1, false) FROM meetings;
 SELECT setval('tasks_id_seq', COALESCE(MAX(id), 0) + 1, false) FROM tasks;
+SELECT setval('schedules_id_seq', COALESCE(MAX(id), 0) + 1, false) FROM schedules;

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from io import BytesIO
 
 import pytest
 from httpx import AsyncClient
@@ -47,7 +48,7 @@ class TaskRequester:
             "files": {
                 "file_field": (
                     "test.txt",
-                    open(Path.home() / "SyncProject" / "tests" / "test.txt", "rb"),
+                    BytesIO(b"Some text content"),
                     "text/plain",
                 )
             },

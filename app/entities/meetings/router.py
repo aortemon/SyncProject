@@ -63,7 +63,6 @@ async def update_meeting(
     employees = []
     if "employees" in meeting_data:
         employees = meeting_data.pop("employees")
-        print("??????? ", employees)
         if not isinstance(employees, list):
             raise HTTPException(status_code=422, detail="Something went wrong")
 
