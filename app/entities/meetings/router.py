@@ -80,6 +80,9 @@ async def update_meeting(
             meeting_result = await MeetingsDAO.update_with_outer_session(
                 session, filter_by={"id": meeting_data["id"]}, **meeting_data
             )
+            meeting = await MeetingsDAO.find_one_or_none_by_id(
+                data_id=meeting_data["id"]
+            )
             await session.flush()
             res = await EmployeeMeetingsDAO.delete(
                 delete_all=True, meeting_id=meeting_data["id"]
@@ -99,8 +102,8 @@ async def update_meeting(
                         session,
                         reciever_id=empl,
                         title="Собрание изменилось!",
-                        description=f'Добавлены изменения в собрании "{meeting_data["name"]}"',
-                        link=f"/meetings/get_by_id/?id={meeting_result.id}",
+                        description=f'Добавлены изменения в собрании "{meeting.name}"',
+                        link=f"/meetings/get_by_id/?id={meeting.id}",
                     )
         try:
             await session.commit()
