@@ -1,3 +1,4 @@
+import pprint
 import shutil
 from pathlib import Path
 from typing import List, Optional
@@ -12,6 +13,7 @@ from app.entities.common.exc import NotFoundError
 from app.entities.employees.models import Employee
 from app.entities.files.dao import FilesDAO
 from app.entities.files.schemas import SNewFile
+from app.entities.notifications.dao import NotificationsDAO
 from app.entities.taskcomments.dao import TaskCommentDAO
 from app.entities.taskcomments.schemas import SAddComment
 from app.entities.taskfiles.dao import TaskFilesDAO
@@ -115,6 +117,7 @@ async def update_task(
     has_start_date = "start_date" in upd_dict
     has_end_date = "end_date" in upd_dict
     id = upd_dict["id"]
+    task = await TasksDAO.find_one_or_none_by_id(id)
     if has_start_date ^ has_end_date:
         previous = await TasksDAO.find_one_or_none_by_id(id)
         if not previous:
@@ -134,6 +137,13 @@ async def update_task(
             del upd_dict["end_date"]
 
     result = await TasksDAO.update(filter_by={"id": id}, **upd_dict)
+    if "status_id" in upd_dict:
+        await NotificationsDAO.add(
+            reciever_id=task.creator_id,
+            title="Новый статус!",
+            description=f'{user_data.fname} изменил статус задачи "{task.name}"',
+            link=f"/tasks/get_by_id/?id={task.id}",
+        )
     if result == 0:
         raise NotFoundError(field="id", value=id)
     return {"msg": f"Task(id={id}) was updated successfully"}
@@ -161,4 +171,11 @@ async def comment_task(
     add_dict = comment.model_dump()
     add_dict["author_id"] = user_data.id
     await TaskCommentDAO.add(**add_dict)
+    task = await TasksDAO.find_one_or_none_by_id(data_id=add_dict["task_id"])
+    await NotificationsDAO.add(
+        reciever_id=task.creator_id,
+        title="Новый комментарий!",
+        description=f'{user_data.fname} прокомментировал "{task.name}"',
+        link=f"/tasks/get_by_id/?id={task.id}",
+    )
     return {"msg": "Comment added successfully"}

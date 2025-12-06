@@ -7,6 +7,7 @@ from app.entities.employeemeetings.dao import EmployeeMeetingsDAO
 from app.entities.employees.models import Employee
 from app.entities.meetings.dao import MeetingsDAO
 from app.entities.meetings.schemas import SNewMeeting, SUpdateMeeting
+from app.entities.notifications.dao import NotificationsDAO
 from database.session import Sessioner
 
 router = APIRouter(prefix="/meetings", tags=["Meetings"])
@@ -46,6 +47,14 @@ async def add_meeting(
                     await EmployeeMeetingsDAO.add_with_outer_session(
                         session, meeting_id=meeting_result.id, employee_id=empl  # type: ignore
                     )
+                    await NotificationsDAO.add_with_outer_session(
+                        session,
+                        reciever_id=empl,
+                        title="Новое собрание!",
+                        description=f'Вы приглашены на собрание "{meeting_data["name"]}"',
+                        link=f"/meetings/get_by_id/?id={meeting_result.id}",
+                    )
+
         try:
             await session.commit()
         except SQLAlchemyError as e:
@@ -71,6 +80,9 @@ async def update_meeting(
             meeting_result = await MeetingsDAO.update_with_outer_session(
                 session, filter_by={"id": meeting_data["id"]}, **meeting_data
             )
+            meeting = await MeetingsDAO.find_one_or_none_by_id(
+                data_id=meeting_data["id"]
+            )
             await session.flush()
             res = await EmployeeMeetingsDAO.delete(
                 delete_all=True, meeting_id=meeting_data["id"]
@@ -85,6 +97,14 @@ async def update_meeting(
                         raise HTTPException(
                             status_code=422, detail="Something went wrong"
                         )
+
+                    await NotificationsDAO.add_with_outer_session(
+                        session,
+                        reciever_id=empl,
+                        title="Собрание изменилось!",
+                        description=f'Добавлены изменения в собрании "{meeting.name}"',
+                        link=f"/meetings/get_by_id/?id={meeting.id}",
+                    )
         try:
             await session.commit()
         except SQLAlchemyError as e:
