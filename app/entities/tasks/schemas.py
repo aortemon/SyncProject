@@ -9,8 +9,8 @@ from app.entities.common.schema import SchemaBase, Validate, as_form, partial_mo
 
 
 def validate_future_or_now(v: date) -> date:
-    if v < date.today():
-        raise ValueError("date can't be in the past")
+    # if v < date.today():
+    #     raise ValueError("date can't be in the past")
     return v
 
 
@@ -40,6 +40,7 @@ class SNewTask(TasksBase):
             raise HTTPException(400, f"Invalid task data: {e}")
 
 
+@partial_model(required_fields=["id"])
 class SUpdateTask(TasksBase):
     id: int = Field(..., description="ID of task to update")
     executor_id: int | None = None  # Field(..., description="Executor's ID")
