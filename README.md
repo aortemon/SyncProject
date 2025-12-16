@@ -20,9 +20,10 @@
 6. Install all the project requirements with `pip3 install -r requirements.txt`
 7. Start the server with `uvicorn app.main:app` inside the SyncProject root directory
 
-### Via bash script
+<!-- ### Via bash script
 1. Set up Postgres server, python3.12 and pip3
 2. Source the server destination directory
 3. Get the script and run it with `curl -L https://github.com/aortemon/SyncProj/install.sh && bash ./install.sh`
 4. Source to the created `SyncProject` directory and fill the `.env` file
 5. Start the server with `uvicorn app.main:app` inside the SyncProject root directory
+-->
